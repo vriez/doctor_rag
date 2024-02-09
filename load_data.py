@@ -10,6 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 from itertools import product
+
 # from utils import Neo4jConnection, get_relations_df, get_triples, update_data, add_ners_rels
 from langchain.graphs.graph_document import (
     Node,
@@ -31,7 +32,6 @@ assert input_dir.exists()
 files = list(input_dir.rglob("*.csv"))
 
 
-
 from neo4j import GraphDatabase
 
 # Neo4j connection details
@@ -39,12 +39,24 @@ uri = "bolt://localhost:7687"  # Update with your Neo4j server URI
 username = "neo4j"  # Update with your Neo4j username
 password = "password"  # Update with your Neo4j password
 
+
 def insert_into_neo4j(data):
     driver = GraphDatabase.driver(uri, auth=(username, password))
 
     with driver.session() as session:
         for row in data[1:]:
-            relation, entity1, entity1_begin, entity1_end, chunk1, entity2, entity2_begin, entity2_end, chunk2, confidence = row
+            (
+                relation,
+                entity1,
+                entity1_begin,
+                entity1_end,
+                chunk1,
+                entity2,
+                entity2_begin,
+                entity2_end,
+                chunk2,
+                confidence,
+            ) = row
 
             query = (
                 f"MERGE (e1:{entity1} {{name: '{chunk1}'}})"
@@ -55,6 +67,7 @@ def insert_into_neo4j(data):
             session.run(query)
 
     driver.close()
+
 
 def insert_into_neo4j__prompted(data):
     driver = GraphDatabase.driver(uri, auth=(username, password))
@@ -90,19 +103,35 @@ def insert_into_neo4j__prompted(data):
 for f in files:
     df = pd.read_csv(f)
 
-    df["subject_name"] = df["subject_name"].astype(str).apply(lambda x: x.replace("-", "_"))
-    df["object_name"] = df["object_name"].astype(str).apply(lambda x: x.replace("-", "_"))
-    df["relationship"] = df["relationship"].astype(str).apply(lambda x: x.replace("-", "_"))
-    df["subject_type"] = df["subject_type"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    df["subject_name"] = (
+        df["subject_name"].astype(str).apply(lambda x: x.replace("-", "_"))
+    )
+    df["object_name"] = (
+        df["object_name"].astype(str).apply(lambda x: x.replace("-", "_"))
+    )
+    df["relationship"] = (
+        df["relationship"].astype(str).apply(lambda x: x.replace("-", "_"))
+    )
+    df["subject_type"] = (
+        df["subject_type"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    )
     # df["object_name"] = df["object_name"].astype(str).apply(lambda x: x.replace("`", ""))
-    df["object_type"] = df["object_type"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    df["object_type"] = (
+        df["object_type"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    )
     # df["object_name"] = df["object_name"].astype(str).apply(lambda x: x.replace("'", ""))
     # df["relationship"] = df["relationship"].astype(str).apply(lambda x: x.replace("`", ""))
     # print(df)
     # df["chunk2"] = df["chunk2"].astype(str).apply(lambda x: x.replace("'", ""))
-    df["subject_name"] = df["subject_name"].astype(str).apply(lambda x: x.replace(" ", "_"))
-    df["object_name"] = df["object_name"].astype(str).apply(lambda x: x.replace(" ", "_"))
-    df["relationship"] = df["relationship"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    df["subject_name"] = (
+        df["subject_name"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    )
+    df["object_name"] = (
+        df["object_name"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    )
+    df["relationship"] = (
+        df["relationship"].astype(str).apply(lambda x: x.replace(" ", "_"))
+    )
     data = df.values.tolist()
 
     insert_into_neo4j__prompted(data)
