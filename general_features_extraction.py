@@ -3,7 +3,7 @@ import gc
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
-from pydash import snake_case
+# from pydash import snake_case
 from itertools import product
 from langchain.embeddings import (
     OllamaEmbeddings,
@@ -13,6 +13,7 @@ from langchain.graphs import Neo4jGraph
 from langchain.chat_models import ChatOllama
 from langchain.prompts import PromptTemplate
 from typing import List, Optional
+
 # from langchain.chains import GraphCypherQAChain
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.output_parsers import (
@@ -22,14 +23,15 @@ from langchain.output_parsers import (
     CommaSeparatedListOutputParser,
     # ListOutputParser,
 )
+
 # from langchain.chains import create_extraction_chain_pydantic
 # from langchain.vectorstores.utils import filter_complex_metadata
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import (
-    BibtexLoader,
+    # BibtexLoader,
     # WikipediaLoader,
     PubMedLoader,
-    # WebBaseLoader,
+    WebBaseLoader,
 )
 from langchain.pydantic_v1 import Field, BaseModel, ConstrainedList
 from langchain_community.document_loaders import DirectoryLoader, PyPDFDirectoryLoader
@@ -51,16 +53,19 @@ cols = ["subject_name", "subject_type", "relationship", "object_name", "object_t
 
 model = ChatOllama(model="mistral", temperature=0.0)
 
+
 # Set up a parser + inject instructions into the prompt template.
 def transform_cell(cell_value):
     # print("cell_value: ", cell_value)
-    cell_value = ' '.join(re.sub(r'(?<=[a-z])(?=[A-Z](?![A-Z]))', ' ', cell_value).lower().split())
+    cell_value = " ".join(
+        re.sub(r"(?<=[a-z])(?=[A-Z](?![A-Z]))", " ", cell_value).lower().split()
+    )
     # cell_value = snake_case(cell_value).replace("_", " ")
     return cell_value
 
 
 def parse(data):
-    text = ''.join(data)
+    text = "".join(data)
     pattern = r"- (\d+)\. - (.*?) <@>"
 
     matches = re.findall(pattern, text, re.DOTALL)
@@ -172,77 +177,102 @@ chain = {"unstructured_text": RunnablePassthrough()} | prompt | model | parser
 CHUNK_SIZE = [512, 1024, 2048, 4096]
 CHUNK_OVERLAP = [0, 24, 56]
 
-loader = PyPDFDirectoryLoader("busca__final")
+loader = PyPDFDirectoryLoader("dataset")
 docs = loader.load()
 
-for chunk_size, chunk_overlap in product(CHUNK_SIZE, CHUNK_OVERLAP):
-    output_dir = Path(f"cleaned_data__{chunk_size}_{chunk_overlap}")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    graph_dir = output_dir / "graph"
-    graph_dir.mkdir(parents=True, exist_ok=True)
+output_folder = Path("py_pdf_directory_loader")
+counter = 0
+fname = None
+dok = None
+data = ""
+for doc in docs:
+    fname = Path(doc.metadata['source'])
+    if Path(output_folder / f"{fname.stem}.txt").exists():
+        continue
+    if not bool(dok):
+        dok = fname
+    if dok != fname:
+        dok = fname
+        counter = 0
+        with open(output_folder / f"{fname.stem}.txt", "w") as f:
+            f.write(data)
+        data = ""
+    
+    
+    # print(f"{fname.stem}_{counter}.txt")
+    counter += 1
+    data += ("\n" + data)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    chunks = text_splitter.split_documents(docs)
+from pypdf import PdfReader
 
-    offset = 0
-    chunks = chunks[offset:]
+# for chunk_size, chunk_overlap in product(CHUNK_SIZE, CHUNK_OVERLAP):
+#     output_dir = Path(f"cleaned_data__{chunk_size}_{chunk_overlap}")
+#     output_dir.mkdir(parents=True, exist_ok=True)
+#     graph_dir = output_dir / "graph"
+#     graph_dir.mkdir(parents=True, exist_ok=True)
 
+#     text_splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=chunk_size, chunk_overlap=chunk_overlap
+#     )
+#     chunks = text_splitter.split_documents(docs)
 
-    for i, chunk in tqdm(enumerate(chunks, offset), total=len(chunks)):
+#     offset = 0
+#     chunks = chunks[offset:]
 
-        file_name = Path(chunk.metadata.get("source")).stem
-        doc_text = chunk.page_content.replace('-\n', '')
-        # doc_text = re.sub(r'(?<!\.)\n', ' ', doc_text)
+#     for i, chunk in tqdm(enumerate(chunks, offset), total=len(chunks)):
 
-        if not Path(graph_dir / f"{i}_{file_name}.csv").exists():
-            data = chain.invoke({"unstructured_text": doc_text})
-            f = Path(chunk.metadata.get('source')).stem
-            df = parse(data)
-            df.to_csv(graph_dir / f"{i}_{file_name}.csv", index=None)
+#         file_name = Path(chunk.metadata.get("source")).stem
+#         doc_text = chunk.page_content.replace("-\n", "")
+#         # doc_text = re.sub(r'(?<!\.)\n', ' ', doc_text)
 
-        gc.collect()
-    gc.collect()
+#         if not Path(graph_dir / f"{i}_{file_name}.csv").exists():
+#             data = chain.invoke({"unstructured_text": doc_text})
+#             f = Path(chunk.metadata.get("source")).stem
+#             df = parse(data)
+#             df.to_csv(graph_dir / f"{i}_{file_name}.csv", index=None)
 
-        # nodes = []
-        # rels = []
-        # for trp in data.triples:
-        #     subject_node = Node(id=trp.subject_name, type=trp.subject_type)
-        #     object_node = Node(id=trp.object_name, type=trp.object_type)
-        #     rel = Relationship(
-        #         source=subject_node,
-        #         target=object_node,
-        #         type=trp.relationship
-        #     )
-        #     nodes.extend([subject_node, object_node])
-        #     rels.append(rel)
+#         gc.collect()
+#     gc.collect()
 
-        # # Print or use the resulting GraphDocument
-        # graph_document = GraphDocument(
-        #     nodes=nodes,
-        #     relationships=rels,
-        #     source=chunk,
-        # )
-        # # print(graph_document)
+#     # nodes = []
+#     # rels = []
+#     # for trp in data.triples:
+#     #     subject_node = Node(id=trp.subject_name, type=trp.subject_type)
+#     #     object_node = Node(id=trp.object_name, type=trp.object_type)
+#     #     rel = Relationship(
+#     #         source=subject_node,
+#     #         target=object_node,
+#     #         type=trp.relationship
+#     #     )
+#     #     nodes.extend([subject_node, object_node])
+#     #     rels.append(rel)
 
-        # graph.add_graph_documents([graph_document])
+#     # # Print or use the resulting GraphDocument
+#     # graph_document = GraphDocument(
+#     #     nodes=nodes,
+#     #     relationships=rels,
+#     #     source=chunk,
+#     # )
+#     # # print(graph_document)
 
+#     # graph.add_graph_documents([graph_document])
 
-    # cypher_chain = GraphCypherQAChain.from_llm(
-    #     graph=graph,
-    #     cypher_llm=model,
-    #     qa_llm=model,
-    #     validate_cypher=True,
-    #     verbose=True,
-    # )
+#     # cypher_chain = GraphCypherQAChain.from_llm(
+#     #     graph=graph,
+#     #     cypher_llm=model,
+#     #     qa_llm=model,
+#     #     validate_cypher=True,
+#     #     verbose=True,
+#     # )
 
-    # def ask(self, query: str):
-    #     if not chain:
-    #         return "Please, add a PDF document first."
-    #     graph_result = cypher_chain.run(query)
-    #     # graph_result = chain.invoke(query)
-    #     return graph_result
+#     # def ask(self, query: str):
+#     #     if not chain:
+#     #         return "Please, add a PDF document first."
+#     #     graph_result = cypher_chain.run(query)
+#     #     # graph_result = chain.invoke(query)
+#     #     return graph_result
 
-    # def clear(self):
-    #     vector_store = None
-    #     retriever = None
-    #     chain = None
+#     # def clear(self):
+#     #     vector_store = None
+#     #     retriever = None
+#     #     chain = None

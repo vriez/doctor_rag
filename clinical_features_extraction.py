@@ -23,6 +23,7 @@ from sparknlp.base import LightPipeline
 # user = "neo4j"
 # conn = Neo4jConnection(uri=uri, user=user, pwd=pwd)
 
+
 def infer(pipeline, data):
     empty_data = spark.createDataFrame([[""]]).toDF("text")
     model = pipeline.fit(empty_data)
@@ -30,6 +31,7 @@ def infer(pipeline, data):
     annotations = lmodel.fullAnnotate(data)
     res_df = get_relations_df(annotations)
     return res_df
+
 
 loader = PyPDFDirectoryLoader("busca__final")
 docs = loader.load()
@@ -54,21 +56,22 @@ for chunk_size, chunk_overlap in product(CHUNK_SIZE, CHUNK_OVERLAP):
     posology_dir = output_dir / "posology_relation_extraction_pipeline"
     posology_dir.mkdir(parents=True, exist_ok=True)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
     chunks = text_splitter.split_documents(docs)
 
     offset = 0
     chunks = chunks[offset:]
 
-
     for i, chunk in tqdm(enumerate(chunks, offset), total=len(chunks)):
-        
+
         text = chunk.page_content
         file_path = chunk.metadata.get("source")
         file_name = Path(file_path).stem
 
         # value_of_B = catalog_df.loc[catalog_df['md5sum'] == hash, 'B'].values[0]
-        doc_text = chunk.page_content.replace('-\n', '')
+        doc_text = chunk.page_content.replace("-\n", "")
         # doc_text = re.sub(r'(?<!\.)\n', ' ', doc_text)
 
         if not Path(clinical_temp_dir / f"{i}_{file_name}.csv").exists():
@@ -109,13 +112,13 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 
 for i, chunk in tqdm(enumerate(docs, offset), total=len(chunks)):
-    
+
     text = chunk.page_content
     file_path = chunk.metadata.get("source")
     file_name = Path(file_path).stem
 
     # value_of_B = catalog_df.loc[catalog_df['md5sum'] == hash, 'B'].values[0]
-    doc_text = chunk.page_content.replace('-\n', '')
+    doc_text = chunk.page_content.replace("-\n", "")
     # doc_text = re.sub(r'(?<!\.)\n', ' ', doc_text)
 
     events_df = infer(clinical_temp_events_re_pipeline, text)
