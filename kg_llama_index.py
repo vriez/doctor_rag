@@ -88,15 +88,15 @@ tags = ["entity"]
 # )
 
 
-# username = "neo4j"
-# password = "9eGGLTE9W13bttviLjMmQRpzaxYzWSmhiW64CrGi40w"
-# url = "neo4j+s://4feea599.databases.neo4j.io"
-# database = "neo4j"
-
 username = "neo4j"
-password = "password"
-url = "neo4j://127.0.0.1:7687"
+password = "9eGGLTE9W13bttviLjMmQRpzaxYzWSmhiW64CrGi40w"
+url = "neo4j+s://4feea599.databases.neo4j.io"
 database = "neo4j"
+
+# username = "neo4j"
+# password = "password"
+# url = "neo4j://127.0.0.1:7687"
+# database = "neo4j"
 
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database

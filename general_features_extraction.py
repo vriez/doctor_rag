@@ -33,8 +33,14 @@ from langchain.document_loaders import (
     PubMedLoader,
     WebBaseLoader,
 )
+from langchain.graphs.graph_document import (
+    Node as BaseNode,
+    Relationship as BaseRelationship,
+    GraphDocument,
+)
 from langchain.pydantic_v1 import Field, BaseModel, ConstrainedList
 from langchain_community.document_loaders import DirectoryLoader, PyPDFDirectoryLoader
+from langchain.pydantic_v1 import Field, BaseModel
 
 # embeddings = OllamaEmbeddings(model="mistral")
 
@@ -79,8 +85,34 @@ def parse(data):
     result = result.applymap(transform_cell)
     return result
 
+class Property(BaseModel):
+    """A single property consisting of key and value"""
 
-parser = CommaSeparatedListOutputParser()
+    key: str = Field(..., description="key")
+    value: str = Field(..., description="value")
+
+
+class Node(BaseNode):
+    properties: Optional[List[Property]] = Field(
+        None, description="List of node properties"
+    )
+
+
+class Relationship(BaseRelationship):
+    properties: Optional[List[Property]] = Field(
+        None, description="List of relationship properties"
+    )
+
+
+class KnowledgeGraph(BaseModel):
+    """Generate a knowledge graph with entities and relationships."""
+
+    nodes: List[Node] = Field(..., description="List of nodes in the knowledge graph")
+    rels: List[Relationship] = Field(
+        ..., description="List of relationships in the knowledge graph"
+    )
+
+parser = PydanticOutputParser(pydantic_object=KnowledgeGraph)
 
 prompt_message = """
 Domain:
@@ -166,7 +198,7 @@ prompt = PromptTemplate(
     template=prompt_message,
     input_variables=["unstructured_text"],
     partial_variables={"format_instructions": parser.get_format_instructions()},
-    format="json",
+    format="j",
     template_format="jinja2",
     validate_template=True,
 )
