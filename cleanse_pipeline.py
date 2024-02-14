@@ -9,7 +9,7 @@ from docx.shared import Cm
 from itertools import product
 from functools import partial
 from multiprocessing import Pool
-from generate_rels import *
+# from generate_rels import *
 
 tool = language_tool_python.LanguageTool('en-US')  # use a local server (automatically set up), language English
 
@@ -140,13 +140,15 @@ def correct_morphology(text):
 def pipeline(document):
 
     doc = delete_images_and_tables(document)
-    doc = select_text_smaller(doc)
-    doc = select_text_greater(doc)
+    # doc = select_text_smaller(doc)
+    # doc = select_text_greater(doc)
+    doc = document
 
     attachments = []
     show = False
     data = []
-
+    keywords = ["abstract", "introduction", "summary"]
+    # is_present = any(keyword in p.text.lower() for keyword in keywords)
     last_data = ""
     for p in doc.paragraphs:
         if starts_with_table(p.text) or starts_with_figure(p.text):
@@ -156,35 +158,42 @@ def pipeline(document):
         if p.text.upper() == "REFERENCES":
             show = False
             continue
-        if p.text.upper() == "INTRODUCTION":
-            show = True
-            continue
+
+        if show is False:
+
+            if any(keyword in p.text.lower() for keyword in keywords):
+                show = True
+                continue
+
         if p.text.isnumeric():
             continue
         if p.text.upper() == p.text:
             continue
 
         if p.text != "" and show:
-            # print(p.text)
             if is_finished(p.text):
                 last_data += (" " + p.text)
                 # print(last_data)
-                continuous_text = merge_lowercase_with_hyphen(last_data)
-                morph_text = correct_morphology(continuous_text)
-                clean_text = remove_consecutive_whitespaces(morph_text)
-                clean_text = remove_spaces_around_parentheses(clean_text)
-                clean_text = clean_text.strip()
-                clean_text = re.sub(r"\n+", " ", clean_text)
-                clean_sentences = clean_text.strip().replace(". ", ".<|>").split("<|>")
+                # continuous_text = merge_lowercase_with_hyphen(last_data)
+                # morph_text = correct_morphology(continuous_text)
+                last_data = remove_consecutive_whitespaces(last_data).strip()
+                # clean_text = remove_spaces_around_parentheses(clean_text)
+                # clean_text = clean_text.strip()
+                # clean_text = re.sub(r"\n+", " ", clean_text)
+                # clean_sentences = clean_text.strip().replace(". ", ".<|>").split("<|>")
 
                 # clean_sentences = text_to_sentences(clean_text)
 
-                data.extend(clean_sentences)
+                # data.extend(clean_sentences)
+                # print(last_data)
+                # print()
+                data.append(last_data)
 
                 last_data = ""
             else:
                 last_data = p.text.replace("-\n", "")
             # continue
+        # print(last_data)
     data.extend(attachments)
     return data
     
@@ -199,11 +208,11 @@ for f in input_files:
     data = pipeline(document)
     
     for d in data:
-        rels = ner_extract(d)
+        # rels = ner_extract(d)
         row = {
             "descriptor": f.stem,
             "text": d,
-            "ner": rels
+            # "ner": rels
         }
         text_rels_pairs.append(row)
         
@@ -213,8 +222,7 @@ for f in input_files:
     # print(pd.DataFrame(text_rels_pairs))
 
 df = pd.DataFrame(text_rels_pairs)
-# df["rels"] = df["1"].apply(ner_extract)
-df.to_csv("doc_clean_data_no_line_break.csv", index=None)
+df.to_csv("doc_clean_stripped_f_abstract.csv", index=None)
 
 
 # def process_document(f):
