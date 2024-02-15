@@ -285,11 +285,11 @@ extract_msg_1 = """
 
 for each full sentence, perform the step-by-step below:
 
-1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
+1. thoroughly identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
 2. group the adjectives and compound adjectives by their corresponding nouns and compounds nouns.
-3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
+3. thoroughly classify the 2. adjectives and compound adjectives in the context of biomedical sciences
 4. group the adverbs and compound adverbs by their corresponding verbs.
-5. classify the 4. adverbs and compound adverbs in the context of biomedical sciences
+5. thoroughly classify the 4. adverbs and compound adverbs in the context of biomedical sciences
 6. group the verbs by the nouns they relate
 7. create Node objects such that:
   - Node's ids are the nouns and compound nouns from step 2.
@@ -307,69 +307,69 @@ for each full sentence, perform the step-by-step below:
   
   output:
 
-    {
-        "nodes": [
-          {
-            "id": "Albert Einstein",
-            "type": "Person",
-            "properties": [
-              {
-                "key": "role",
-                "value": "Scientist"
-              },
-              {
-                "key": "profession",
-                "value": "Physicist"
-              },
-              {
-                "key": "nationality",
-                "value": "German"
-              },
-              {
-                "key": "birth date",
-                "value": "March 14, 1879"
-              }
-            ]
-          },
-          {
-            "id": "Theory of Relativity",
-            "type": "Theory",
-            "properties": [
-              {
-                "key": "field of study",
-                "value": "Physics"
-              }
-            ]
-          }
-        ],
-        "rels": [
-          {
-            "source": {
+      {
+          "nodes": [
+            {
               "id": "Albert Einstein",
-              "type": "Physicist"
-            },
-            "target": {
-              "id": "Theory of Relativity",
-              "type": "Theory"
-            },
-            "type": "developed",
-            "properties": [
+              "type": "Person",
+              "properties": [
                 {
-                  "key": "year",
-                  "value": "1905"
+                  "key": "role",
+                  "value": "Scientist"
                 },
                 {
-                  "key": "best know for",
-                  "value": "development"
-                }
+                  "key": "profession",
+                  "value": "Physicist"
+                },
                 {
-                  "key": "published at",
-                  "value": "On the Electrodynamics of Moving Bodies"
+                  "key": "nationality",
+                  "value": "German"
+                },
+                {
+                  "key": "birth date",
+                  "value": "March 14, 1879"
                 }
               ]
-          }
-        ]
-    }
+            },
+            {
+              "id": "Theory of Relativity",
+              "type": "Theory",
+              "properties": [
+                {
+                  "key": "field of study",
+                  "value": "Physics"
+                }
+              ]
+            }
+          ],
+          "rels": [
+            {
+              "source": {
+                "id": "Albert Einstein",
+                "type": "Physicist"
+              },
+              "target": {
+                "id": "Theory of Relativity",
+                "type": "Theory"
+              },
+              "type": "developed",
+              "properties": [
+                  {
+                    "key": "year",
+                    "value": "1905"
+                  },
+                  {
+                    "key": "best know for",
+                    "value": "development"
+                  }
+                  {
+                    "key": "published at",
+                    "value": "On the Electrodynamics of Moving Bodies"
+                  }
+                ]
+            }
+          ]
+      }
 
 10. return the result in a json object where the nodes and relationships are placed on a lists under `nodes` and `rels`, respectively; as in the step 10. example
 
