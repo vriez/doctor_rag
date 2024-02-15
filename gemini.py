@@ -174,13 +174,21 @@ Input: {{ unstructured_text }}
 extract_msg = """
 take the input text and follow the procedure step by step bellow:
 0. correct the punctuation, synthax and morphology of the input text.
-1. extract the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs from 0.
+1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs:
 2. organize 2.'s the schema below such that:
-  - properties are objects with two attributes key and value. neither key nor value can contain `,`
-  - a property value is a compound noun, adjective or compound adjective
-  - a property keys is most adequate semantic classification of the property value in the given context
+  - properties are objects with attributes key[string] and value[string]. neither key nor value can contain `,`
+  - Poperty value is a compound noun, adjective or compound adjective and must not be infered
+  - Property keys is the infered type of the property value in the biomedical context
+  - nodes are objects with attributes id[string], type[string] and properties[list[Property]]
   - nodes are nouns whose properties are compounds nouns, adjectives and compound adjectives
-  - relationships are verbs whose properties are the adverbs
+  - Node id is noun or compound noun not a verb or compound adjective used as a noun
+  - Node type is the infered type of the property value in the biomedical context
+  - Node properties is a list properties that are linked to the Node`s id
+  - relationships are objects with attributes source[Node], target[Node], type[string] and properties[list[Property]]
+  - Relationship type is the verb that describes the interaction between source and target in the correct direction
+  - Relationship properties are the present adverbs and compound adjectives as well as the infered meaninful properties
+  - 
+
 3. one example is given by:
 
   input:
@@ -268,9 +276,155 @@ formatting instructions: {{ format_instructions }}
 8. are you sure the result is correct? fix it
 """
 
+extract_msg_1 = """
+0. definitions
+  - Property has only two attributes: key[string] and value[string].
+  - Node has only three attributes: id[string], type[string] and properties[list[Property]].
+  - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]].
+
+  - treat copulas and verbs the same
+
+for each full sentence, perform the step-by-step below:
+
+1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
+2. group the adjectives and compound adjectives by their corresponding nouns and componound nouns.
+3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
+4. group the adverbs and compound adverbs by their corresponding verbs.
+5. classify the 4. adverbs and compound adverbs in the context of biomedical sciences
+6. group the verbs by the nouns they relate
+7. create Node objects such that:
+  - Node's ids are the nouns and compound nouns from step 2.
+  - Node's properties are the corresponding nouns and compound nouns adjectives from step 2.
+  - Node's  types are the enriched classes from step 3.
+8. create Relationship objects such that:
+  - Relationship's types are the leading verbs derived from step 4.
+  - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
+  - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nound related by the Relationship's id verb.
+
+9. example
+
+  input:
+  
+      Albert Einstein is best known for developing the theory of relativity
+  
+  output:
+
+    {
+        "nodes": [
+          {
+            "id": "Albert Einstein",
+            "type": "Person",
+            "properties": [
+              {
+                "key": "role",
+                "value": "Scientist"
+              },
+              {
+                "key": "profession",
+                "value": "Physicist"
+              },
+              {
+                "key": "nationality",
+                "value": "German"
+              },
+              {
+                "key": "birth date",
+                "value": "March 14, 1879"
+              }
+            ]
+          },
+          {
+            "id": "Theory of Relativity",
+            "type": "Theory",
+            "properties": [
+              {
+                "key": "field of study",
+                "value": "Physics"
+              }
+            ]
+          }
+        ],
+        "rels": [
+          {
+            "source": {
+              "id": "Albert Einstein",
+              "type": "Physicist"
+            },
+            "target": {
+              "id": "Theory of Relativity",
+              "type": "Theory"
+            },
+            "type": "developed",
+            "properties": [
+                {
+                  "key": "year",
+                  "value": "1905"
+                },
+                {
+                  "key": "best know for",
+                  "value": "development"
+                }
+                {
+                  "key": "published at",
+                  "value": "On the Electrodynamics of Moving Bodies"
+                }
+              ]
+          }
+        ]
+    }
+
+10. return the result in a json object where the nodes and relationships are placed on a lists under `nodes` and `rels`, respectively; as in the step 9. example
+
+the input text is:
+
+{{ unstructured_text }}
+{{ format_instructions }}
+
+13. format the output as a valid JSON object.
+
+
+"""
+
+extract_msg_2 = """
+0. definitions
+  - Property has only two attributes: key[string] and value[string].
+  - Node has only three attributes: id[string], type[string] and properties[list[Property]].
+  - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]].
+
+  - treat copulas and verbs the same
+
+for each full sentence, perform the step-by-step below:
+
+1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
+2. group the adjectives and compound adjectives by their corresponding nouns and compound nouns.
+3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
+4. group the adverbs and compound adverbs by their corresponding verbs.
+5. classify the 4. adverbs and compound adverbs in the context of biomedical sciences
+6. group the verbs by the nouns they relate
+7. create Node objects such that:
+  - Node's ids are the nouns and compound nouns from step 2.
+  - Node's properties are the corresponding nouns and compound nouns adjectives from step 2.
+  - Node's  types are the enriched classes from step 3.
+8. create Relationship objects such that:
+  - Relationship's types are the leading verbs derived from step 4.
+  - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
+  - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nouns related by the Relationship's id verb.
+
+9. format the output within a python dictionary such that:
+  - Nodes are stored as a list in a key name `nodes`
+  - Relationships are stored as a list in a key name `rels`
+
+the input text is:
+
+{{ unstructured_text }}
+{{ format_instructions }}
+
+
+"""
+
 json_parser = PydanticOutputParser(pydantic_object=KnowledgeGraph)
 prompt_semantic = PromptTemplate(
-    template=extract_msg,
+    template=extract_msg_1,
     input_variables=["unstructured_text"],
     partial_variables={"format_instructions": json_parser.get_format_instructions()},
     format="json",
