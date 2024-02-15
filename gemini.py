@@ -380,45 +380,10 @@ the input text is:
 {{ unstructured_text }}
 {{ format_instructions }}
 
-13. format the output as a valid JSON object.
-
-
-"""
-
-extract_msg_2 = """
-0. definitions
-  - Property has only two attributes: key[string] and value[string].
-  - Node has only three attributes: id[string], type[string] and properties[list[Property]].
-  - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]].
-
-  - treat copulas and verbs the same
-
-for each full sentence, perform the step-by-step below:
-
-1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
-2. group the adjectives and compound adjectives by their corresponding nouns and compound nouns.
-3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
-4. group the adverbs and compound adverbs by their corresponding verbs.
-5. classify the 4. adverbs and compound adverbs in the context of biomedical sciences
-6. group the verbs by the nouns they relate
-7. create Node objects such that:
-  - Node's ids are the nouns and compound nouns from step 2.
-  - Node's properties are the corresponding nouns and compound nouns adjectives from step 2.
-  - Node's  types are the enriched classes from step 3.
-8. create Relationship objects such that:
-  - Relationship's types are the leading verbs derived from step 4.
-  - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
-  - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nouns related by the Relationship's id verb.
-
-9. format the output within a python dictionary such that:
-  - Nodes are stored as a list in a key name `nodes`
-  - Relationships are stored as a list in a key name `rels`
-
-the input text is:
-
-{{ unstructured_text }}
-{{ format_instructions }}
-
+11. revisit empty relationships and make sure they are not empty. there should be at least one relationship per verb.
+12. ensure that no keys nor values are lists. Should that occur, create new objects with one each.
+13. ensure that the output is a valid JSON object.
+14. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain.
 
 """
 
