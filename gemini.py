@@ -158,10 +158,12 @@ formatting instructions: {{ format_instructions }}
 extract_msg_1 = """
 
 0. definitions
-  - Property has only two attributes: key[string] and value[string].
-  - Node has only three attributes: id[string], type[string] and properties[list[Property]].
-  - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]].
+  - Property has only two attributes: key[string] and value[alpha numeric string], all in camel-case.
+  - Node has only three attributes: id[alpha numeric string], type[string] and properties[list[Property]], all in camel-case.
+  - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]], all in camel-case.
   - treat copulas and verbs the same
+  - all values for all keys must be alpha numeric string
+  - draw special attention to the verbs. each verb in the text must have a corresponding Relationship
 
 1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
 2. group the adjectives and compound adjectives by their corresponding nouns and compounds nouns.
@@ -180,7 +182,6 @@ extract_msg_1 = """
   - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
   - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nouns related by the Relationship's id verb.
   - carefully enrich the properties with biomedical contextual cues for enhancing semantics
-  - thoroughly verify the 
 
 9. example
 
@@ -267,11 +268,12 @@ the input text is:
   - if a relationship's source or target is None, remove the relationship
   - if rels be an empty list and nodes a non empty list, go back to 1. try it more carefully
   - if there is not a relationship for every two nodes, go back to 1.
+  - all values must be alpha numeric strings
 
 12. revisit empty relationships and make sure they are not empty. there should be at least one relationship per verb.
-13. ensure that no keys nor values are lists. Should that occur, create new objects with one each.
+13. ensure that no keys nor values are lists. if that occurs, create new objects with one each.
 14. ensure that the output is a valid JSON object.
-15. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain.
+15. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain
 15. make the output JSON valid
 
 the formatting instructions are: 
