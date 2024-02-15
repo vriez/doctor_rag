@@ -286,8 +286,6 @@ extract_msg_1 = """
 for each full sentence, perform the step-by-step below:
 
 1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
-  - input texts with no verbs or a single noun are
-
 2. group the adjectives and compound adjectives by their corresponding nouns and compounds nouns.
 3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
 4. group the adverbs and compound adverbs by their corresponding verbs.
@@ -301,14 +299,7 @@ for each full sentence, perform the step-by-step below:
   - Relationship's types are the leading verbs derived from step 4.
   - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
   - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nouns related by the Relationship's id verb.
-9. double checking
-  - should a relationship type be None, go back to 1.
-  - should a relationship source cannot be None, go back to 6.
-  - should a relationship target cannot be None, go back to 6.
-  - should rels be an empty list, terminate
-  - should nodes be a list with odd element count, terminate
-
-10. example
+9. example
 
   input:
   
@@ -380,7 +371,7 @@ for each full sentence, perform the step-by-step below:
         ]
     }
 
-11. return the result in a json object where the nodes and relationships are placed on a lists under `nodes` and `rels`, respectively; as in the step 10. example
+10. return the result in a json object where the nodes and relationships are placed on a lists under `nodes` and `rels`, respectively; as in the step 10. example
 
 the input text is:
 
@@ -390,16 +381,20 @@ the formatting instructions are:
 
 {{ format_instructions }}
 
+11. double checking
+  - should a relationship type be None, go back through to 1. and 4. more carefully
+  - should a relationship source cannot be None, go back to 6.
+  - should a relationship target cannot be None, go back to 6.
+  - should rels be an empty list and nodes a non empty list, go back to 1. try it more carefully
+  - all ve
+
 12. revisit empty relationships and make sure they are not empty. there should be at least one relationship per verb.
 13. ensure that no keys nor values are lists. Should that occur, create new objects with one each.
 14. ensure that the output is a valid JSON object.
 15. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain.
+16. if the output is not a valid JSON object, explain what went wrong
 """
-# 12. revisit empty relationships and make sure they are not empty. there should be at least one relationship per verb.
-# 13. ensure that no keys nor values are lists. Should that occur, create new objects with one each.
-# 14. ensure that the output is a valid JSON object.
-# 15. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain.
-# 15. ensure there is no trace of the step 9. example in the output
+
 json_parser = PydanticOutputParser(pydantic_object=KnowledgeGraph)
 prompt_semantic = PromptTemplate(
     template=extract_msg_1,
@@ -414,7 +409,7 @@ prompt_semantic = PromptTemplate(
 # punc_chain = {"unstructured_text": RunnablePassthrough()} | prompt_punctuation | llm | str_parser
 # sent_chain = {"unstructured_text": RunnablePassthrough()} | prompt_sent | llm | lst_parser
 sem_chain = {"unstructured_text": RunnablePassthrough()} | prompt_semantic | llm | json_parser
-
+print(extract_msg_1)
 texts = [
     "Coronaviruses are enveloped, single stranded, positive sense RNA viruses.",'Background: The key role of Vitamin D is to maintain an adequate calcium and phosphorus metabolism. Vitamin D plays an antagonistic role with the parathyroid hormone. 25 OH Vitamin D is the major circulating form and the best indicator to monitor Vitamin D levels.',
  'Methods: A cross-sectional study was conducted in 1339 individuals 18 years old. The main objective was to establish the nutritional status of Vitamin D and its association with PTH and ionized calcium levels. Other ob-jectives were to compare the levels of 25 OH Vitamin D based on sun exposure habits, and to identify the min-imum cut-off point for the levels of 25 OH Vitamin D that could give rise to a concomitant increase in PTH and ionized calcium levels.',
