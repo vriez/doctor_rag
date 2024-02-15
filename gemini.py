@@ -281,13 +281,14 @@ extract_msg_1 = """
   - Property has only two attributes: key[string] and value[string].
   - Node has only three attributes: id[string], type[string] and properties[list[Property]].
   - Relationship has only four attributes: source[Node], target[Node], type[string] and properties[list[Property]].
-
   - treat copulas and verbs the same
 
 for each full sentence, perform the step-by-step below:
 
 1. identify the nouns, compound nouns, adjective and compound adjectives, adverbs and verbs.
-2. group the adjectives and compound adjectives by their corresponding nouns and componound nouns.
+  - input texts with no verbs or a single noun are
+
+2. group the adjectives and compound adjectives by their corresponding nouns and compounds nouns.
 3. classify the 2. adjectives and compound adjectives in the context of biomedical sciences
 4. group the adverbs and compound adverbs by their corresponding verbs.
 5. classify the 4. adverbs and compound adverbs in the context of biomedical sciences
@@ -299,9 +300,9 @@ for each full sentence, perform the step-by-step below:
 8. create Relationship objects such that:
   - Relationship's types are the leading verbs derived from step 4.
   - Relationship's properties are the adverbs and compound adverbs from step 5. that are related to the Relationship's type.
-  - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nound related by the Relationship's id verb.
+  - Relationship's sources and targets are the Nodes whose ids are the nouns and compound nouns related by the Relationship's id verb.
 9. double checking
-  - should a relationship type be None, go back to 4.
+  - should a relationship type be None, go back to 1.
   - should a relationship source cannot be None, go back to 6.
   - should a relationship target cannot be None, go back to 6.
   - should rels be an empty list, terminate
@@ -384,6 +385,10 @@ for each full sentence, perform the step-by-step below:
 the input text is:
 
 {{ unstructured_text }}
+
+the formatting instructions are: 
+
+{{ format_instructions }}
 
 12. revisit empty relationships and make sure they are not empty. there should be at least one relationship per verb.
 13. ensure that no keys nor values are lists. Should that occur, create new objects with one each.
