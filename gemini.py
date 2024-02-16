@@ -47,7 +47,7 @@ class KnowledgeGraph(BaseModel):
         ..., description="List of relationships in the knowledge graph"
     )
 
-llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.0)
+llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0)
 
 
 extract_msg = """
@@ -529,6 +529,228 @@ given the input text below:
     - the input contains one verb; is
     - the relationship type is is, the source is Tomatoes and the target is Fruits
 
+
+- example c.
+
+  input:
+  
+      Coronaviruses are enveloped, single stranded, positive sense RNA viruses.
+
+  
+  output:
+
+      {
+          "nodes": [
+            {
+              "id": "Coronaviruses",
+              "type": "Fruit",
+              "properties": [
+                {
+                  "key": "structure",
+                  "value": "enveloped"
+                },
+                {
+                  "key": "morphology",
+                  "value": "single stranded"
+                },
+                {
+                  "key": "polarity",
+                  "value": "positive sense"
+                }
+              ]
+            },
+            {
+              "id": "viruses",
+              "type": "RNA",
+              "properties": [
+                {
+                  "key": "biologicalClassification",
+                  "value": "fruit"
+                },
+                {
+                  "key": "nutritionalClassification",
+                  "value": "vegetable"
+                },
+                {
+                  "key": "isMultipleOf",
+                  "value": "fruit"
+                }
+              ]
+            }
+          ],
+          "rels": [
+            {
+              "source": {
+                "id": "Coronaviruses",
+                "type": "Virus"
+              },
+              "target": {
+                "id": "RNA Virus",
+                "type": "Virus"
+              },
+              "type": "are",
+              "properties": [
+                  {
+                    "key": "isTypeOf",
+                    "value": "RNA virus"
+                  }
+                ]
+            }
+          ]
+      }
+
+  rationale:
+    - the input contains one noun and one compound noun; Coronaviruses and RNA Viruses
+    - the input contains one verb; are
+    - the relationship type is `are`, the source is Coronaviruses and the target is RNA Viruses
+
+- example d.
+  input:
+
+    authors declare no conﬂict of interest.
+  
+  output:
+    
+    {
+        "nodes": [
+            {
+                "id": "Authors",
+                "type": "Person",
+                "properties": [
+                    {
+                        "key": "role",
+                        "value": "Author"
+                    }
+                ]
+            },
+            {
+                "id": "ConflictOfInterest",
+                "type": "contract",
+                "properties": [
+                    {
+                        "key": "activity",
+                        "value": "Author"
+                    }
+                ]
+            }
+        ],
+        "rels": [
+            {
+                "source": {
+                    "id": "Authors",
+                    "type": "Person"
+                },
+                "target": {
+                    "id": "ConflictOfInterest",
+                    "type": "contract"
+                },
+                "type": "declare",
+                "properties": [
+                    {
+                        "key": "conflictOfInterest",
+                        "value": "no"
+                    }
+                ]
+            }
+        ]
+    }
+
+- example e.
+
+  input:
+
+    John Doe: analyzed and interpreted the data; wrote the paper.
+  
+  output:
+    
+    {
+        "nodes": [
+            {
+                "id": "John Doe",
+                "type": "Person",
+                "properties": [
+                    {
+                        "key": "role",
+                        "value": "Author"
+                    }
+                ]
+            },
+            {
+                "id": "Data",
+                "type": "material",
+                "properties": [
+                    {
+                        "key": "type",
+                        "value": "digital"
+                    }
+                ]
+            },
+            {
+                "id": "Paper",
+                "type": "publication",
+                "properties": [
+                    {
+                        "key": "publi",
+                        "value": "Author"
+                    }
+                ]
+            }
+        ],
+        "rels": [
+            {
+                "source": {
+                    "id": "John Doe",
+                    "type": "Person"
+                },
+                "target": {
+                    "id": "Data",
+                    "type": "material"
+                },
+                "type": "analyzed",
+                "properties": [
+                    {
+                        "key": "verified",
+                        "value": "data"
+                    }
+                ]
+            },
+            {
+                "source": {
+                    "id": "John Doe",
+                    "type": "Person"
+                },
+                "target": {
+                    "id": "Data",
+                    "type": "material"
+                },
+                "type": "interpreted",
+                "properties": [
+                    {
+                        "key": "madeSenseOf",
+                        "value": "data"
+                    }
+                ]
+            },
+            {
+                "source": {
+                    "id": "John Doe",
+                    "type": "Person"
+                },
+                "target": {
+                    "id": "Paper",
+                    "type": "publication"
+                },
+                "type": "wrote",
+                "properties": [
+                    {
+                        "key": "authored",
+                        "value": "paper"
+                    }
+                ]
+            }
+        ]
+    }
+
 11. the result is a JSON object, similar to step 10's a and b examples
 
 12. double checking
@@ -545,28 +767,87 @@ given the input text below:
 14. ensure that no keys nor values are lists. if that occurs, create new objects with one each.
 15. ensure that the output is a valid JSON object.
 16. enrich the properties of both nodes and relationship so as to improve semantics, contextualization and accuracy; maintain the biomedical domain
-17. make the output JSON valid
+17. make the output JSON valid. if you cannot return a valid JSON object, return an empty KnowledgeGraph
 
 the formatting instructions are: 
 
 {{ format_instructions }}
 
-18. are you sure the result is correct? fix it
+18. are you sure the result is correct? fix it. if you cannot return a valid JSON object, return an empty KnowledgeGraph
+19. if you cannot return a valid JSON object, return an empty KnowledgeGraph
+20. if you encounter:
+  1 -
+    - error:
+      rels -> 6 -> properties -> 0 -> value
+        field required (type=value_error.missing)
+    - solution:
+      add a key name `value` and add value like `key` value
+
+  2 -
+    - error:
+      nodes
+        field required (type=value_error.missing)
+
+    - solution:
+      add an empty key named `nodes` with a empty list as value
+
+  3 -
+    - error:
+      rels
+        field required (type=value_error.missing)
+
+    - solution:
+      add an empty key named `rels` with a empty list as value
+
+  4 -
+    - error:
+      rels -> integer -> target
+        none is not an allowed value (type=type_error.none.not_allowed)
+
+    - solution:
+      create a target object with the properties' data
+
+  5 -
+    - error:
+      rels -> integer -> type
+        field required (type=value_error.missing)
+
+    - solution:
+      create a target object with the properties' data
+          
+  
 """
+
 json_parser = PydanticOutputParser(pydantic_object=KnowledgeGraph)
 prompt_semantic = PromptTemplate(
     template=extract_msg_1,
     input_variables=["unstructured_text"],
-    partial_variables={"format_instructions": json_parser.get_format_instructions()},
+    # partial_variables={"format_instructions": json_parser.get_format_instructions()},
     format="json",
     template_format="jinja2",
     validate_template=True,
 )
 
+camel_case = """
+correct the punctuation, spelling, typos and syntax from the following text:
+
+{{ unstructured_text }}
+
+"""
+camel_case_prompt = PromptTemplate(
+    template=camel_case,
+    input_variables=["unstructured_text"],
+    # partial_variables={"format_instructions": json_parser.get_format_instructions()},
+    format="json",
+    template_format="jinja2",
+    validate_template=True,
+)
 # punc_chain = {"unstructured_text": RunnablePassthrough()} | prompt_punctuation | llm | str_parser
 # sent_chain = {"unstructured_text": RunnablePassthrough()} | prompt_sent | llm | lst_parser
-sem_chain = {"unstructured_text": RunnablePassthrough()} | prompt_semantic | llm | json_parser
+# sem_chain = {"unstructured_text": RunnablePassthrough()} | prompt_semantic | llm | json_parser
 # sem_chain = {"unstructured_text": RunnablePassthrough()} | prompt_splt | llm | list_parser
+sem_chain = {"unstructured_text": RunnablePassthrough()} | camel_case_prompt | llm | StrOutputParser()
+
 # print(extract_msg_1)
 texts = [
   "Coronaviruses are enveloped, single stranded, positive sense RNA viruses.",
@@ -626,18 +907,18 @@ texts = [
 ]
 
 for text in texts:
-  print(text)
+  # print(text)
   sentences = nltk.sent_tokenize(text)
   # print()
   for sentence in sentences:
     try:
-      sem_data_1 = sem_chain.invoke({"unstructured_text": sentence})
       print("S: ", sentence)
+      sem_data_1 = sem_chain.invoke({"unstructured_text": sentence})
       print(sem_data_1)
     except Exception as e:
       print(e, " on ", sentence)
-  print()
-  print()
+      print()
+      print()
 # df = pd.read_csv("doc_clean_data_sentences_idx.csv")
 
 # total = 0
