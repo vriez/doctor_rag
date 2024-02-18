@@ -9,39 +9,48 @@ from docx.shared import Cm
 from itertools import product
 from functools import partial
 from multiprocessing import Pool
+
 # from generate_rels import *
 
-tool = language_tool_python.LanguageTool('en-US')  # use a local server (automatically set up), language English
+tool = language_tool_python.LanguageTool(
+    "en-US"
+)  # use a local server (automatically set up), language English
 
 # Load the English language model
 nlp = spacy.load("en_core_web_sm")
 
+
 def starts_with_figure(row):
-    pattern = r'^(Figure|Fig)\s*\d+[.:]'
+    pattern = r"^(Figure|Fig)\s*\d+[.:]"
     return re.match(pattern, row) is not None
+
 
 def starts_with_table(row):
-    pattern = r'^(Table|Tab)\s*\d+[.:]'
+    pattern = r"^(Table|Tab)\s*\d+[.:]"
     return re.match(pattern, row) is not None
 
+
 def is_finished(s):
-    pattern = r'\.$'
+    pattern = r"\.$"
     return bool(re.search(pattern, s))
+
 
 def remove_consecutive_whitespaces(text):
     # Use regular expression to replace consecutive whitespaces with a single space
-    cleaned_text = re.sub(r'\s+', ' ', text)
+    cleaned_text = re.sub(r"\s+", " ", text)
     return cleaned_text
+
 
 def remove_spaces_around_parentheses(text):
     # Remove spaces after opening parenthesis, bracket, or brace and before a word
-    text = re.sub(r'(?<=[\(\[\{])\s+(?=\w)', '', text)
+    text = re.sub(r"(?<=[\(\[\{])\s+(?=\w)", "", text)
     # Remove spaces after a word and before closing parenthesis, bracket, or brace
-    text = re.sub(r'(?<=\w)\s+(?=[\)\]\}])', '', text)
+    text = re.sub(r"(?<=\w)\s+(?=[\)\]\}])", "", text)
     return text
 
+
 def select_text_smaller(document, font_size=8):
-    # this is ok for we don't are not currently using the 
+    # this is ok for we don't are not currently using the
     doc = copy.deepcopy(document)
     selected_text = []
 
@@ -54,6 +63,7 @@ def select_text_smaller(document, font_size=8):
                 # if run.text != "":
                 #     print(run.text)
     return doc
+
 
 def select_text_greater(document, font_size=13):
     # this is ok for we don't are not currently using the
@@ -73,7 +83,7 @@ def select_text_greater(document, font_size=13):
 
 def merge_lowercase_with_hyphen(text):
     # Define a regex pattern to match lowercase strings containing hyphens
-    pattern = r'\b[a-z]+-[a-z]+\b'
+    pattern = r"\b[a-z]+-[a-z]+\b"
 
     # Find all matches in the text
     matches = re.findall(pattern, text)
@@ -89,7 +99,7 @@ def merge_lowercase_with_hyphen(text):
 
 
 def delete_images_and_tables(document):
-    
+
     # doc = document.copy()
     doc = copy.deepcopy(document)
     images_to_delete = []
@@ -98,8 +108,13 @@ def delete_images_and_tables(document):
     for idx, paragraph in enumerate(doc.paragraphs):
         # Check for images
         for run in paragraph.runs:
-            if run._element.tag == '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}r':
-                for pic in run._element.iter('{http://schemas.openxmlformats.org/drawingml/2006/picture}pic'):
+            if (
+                run._element.tag
+                == "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}r"
+            ):
+                for pic in run._element.iter(
+                    "{http://schemas.openxmlformats.org/drawingml/2006/picture}pic"
+                ):
                     images_to_delete.append((idx, pic))
 
     # Remove images
@@ -123,6 +138,7 @@ def text_to_sentences(text):
     sentences = [sent.text.strip() for sent in doc.sents]
     return sentences
 
+
 def correct_morphology(text):
     matches = tool.check(text)
     # select the matches to be applid to the text
@@ -136,6 +152,7 @@ def correct_morphology(text):
             matches.remove(m)
     corrected_text = language_tool_python.utils.correct(text, matches)
     return corrected_text
+
 
 def pipeline(document):
 
@@ -172,7 +189,7 @@ def pipeline(document):
 
         if p.text != "" and show:
             if is_finished(p.text):
-                last_data += (" " + p.text)
+                last_data += " " + p.text
                 # print(last_data)
                 # continuous_text = merge_lowercase_with_hyphen(last_data)
                 # morph_text = correct_morphology(continuous_text)
@@ -196,33 +213,94 @@ def pipeline(document):
         # print(last_data)
     data.extend(attachments)
     return data
-    
+
+
 input_folder = Path("dataset_docx_ocr")
 
 input_files = input_folder.glob("*.docx")
+
+# input_files = [Path("dataset_docx_ocr/0aefb1158b98bc12005c0f74c9e9987e.docx")]
 
 # dataset = []
 text_rels_pairs = []
 for f in input_files:
     document = Document(f)
     data = pipeline(document)
-    
-    for d in data:
-        # rels = ner_extract(d)
-        row = {
-            "descriptor": f.stem,
-            "text": d,
-            # "ner": rels
-        }
-        text_rels_pairs.append(row)
-        
+
+    # for d in data:
+    #     # rels = ner_extract(d)
+    #     row = {
+    #         "descriptor": f.stem,
+    #         "text": d,
+    #         # "ner": rels
+    #     }
+    #     text_rels_pairs.append(row)
+
+    data = " ".join(data)
+
+    #     prompt = f"""
+    # given the following context:
+
+    # {data}
+
+    # perform the procedure below:
+
+    # 1. correct the punctuation, spelling and typos.
+    # 2. camel-case exclusively all entities, e.g., noun-phrases, nouns, concepts, percentages, p-values, ranges, dosages, concentrations, techniques, methodologies, time periods, time ranges, age ranges, authors, scientific references and other clinical trial related parameters; consider the biomedical context, following the guidelines:
+    #     a- an entity must represent a specific semantic meaning
+    #     b- an entity must not start with a preposition
+    #     c- an entity should not be too long
+    #     d- a camel-cased entity must contain at most 3 nouns
+    #     e- all adjectives must be present in the output
+
+    # 3. snake-case exclusively all phrasal verbs, prepositional verbs, verb-particle constructions, inseparable phrasal verbs, idiomatic verbs, idiomatic expressions, two consecutive verbs and modal verbs, following the guidelines:
+    #     a- verbs must only be concatenated with other surrounding verbs, copulas and prepositions
+    #     b- adverbs must not be concatenated with a noun
+    #     c- a snake-cased verbs must contain no nouns nor articles
+
+    # have you overlooked any of the 2.a, 2.b, 2.c or 2.d, 2.e guidelines? make all necessary corrections.
+    # have you overlooked any of the 3.a, 3.b or 3.c guidelines? make all necessary corrections.
+
+    # no words can be removed from the corrected context
+    # no words can be added to the corrected context
+
+    # ensure all phrasal verbs are snake-cased
+    # ensure all prepositional verbs are snake-cased
+    # ensure all verb-particle constructions are snake-cased
+    # ensure all inseparable phrasal verbs are snake-cased
+    # ensure all idiomatic verbs are snake-cased
+    # ensure all idiomatic expressions are snake-cased
+    # ensure all consecutive verbs are snake-cased
+    # ensure all modal verbs are snake-cased
+
+    # ensure all noun-phrases are camel-cased
+    # ensure all nouns are camel-cased
+    # ensure all concepts are camel-cased
+    # ensure all percentages are camel-cased
+    # ensure all p-values are camel-cased
+    # ensure all ranges are camel-cased
+    # ensure all dosages are camel-cased
+    # ensure all concentrations are camel-cased
+    # ensure all techniques are camel-cased
+    # ensure all methodologies are camel-cased
+    # ensure all time periods are camel-cased
+    # ensure all time ranges are camel-cased
+    # ensure all age ranges are camel-cased
+    # ensure all authors are camel-cased
+    # ensure all scientific references are camel-cased
+
+    #     """
+    # print(name, len(data))
+    with open(f"docx_2_text/{f.stem}.txt", "w") as f:
+        f.write(data)
     # f_name = f.stem
     # data = list(product([f_name], data))
     # dataset.extend(data)
     # print(pd.DataFrame(text_rels_pairs))
 
-df = pd.DataFrame(text_rels_pairs)
-df.to_csv("doc_clean_stripped_f_abstract.csv", index=None)
+# df = pd.DataFrame(text_rels_pairs)
+# print(df)
+# df.to_csv("doc_clean_stripped_f_abstract.csv", index=None)
 
 
 # def process_document(f):

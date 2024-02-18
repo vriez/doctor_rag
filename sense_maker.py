@@ -4,6 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 from itertools import product
+
 # from langchain.chat_models import ChatOllama
 from langchain_community.chat_models import ChatOllama
 from langchain.prompts import PromptTemplate
@@ -24,7 +25,7 @@ model = ChatOllama(model="mistral", temperature=0.0)
 
 
 # parser = CommaSeparatedListOutputParser()\# prompt_message = """
-# You will receive a tab separated value document that contains the extracted data from a PDF file's page. 
+# You will receive a tab separated value document that contains the extracted data from a PDF file's page.
 
 # Task:
 #     - Given a tabe separated document, group columns together that make more sense.

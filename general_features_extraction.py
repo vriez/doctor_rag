@@ -3,6 +3,7 @@ import gc
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
+
 # from pydash import snake_case
 from itertools import product
 from langchain.embeddings import (
@@ -85,6 +86,7 @@ def parse(data):
     result = result.applymap(transform_cell)
     return result
 
+
 class Property(BaseModel):
     """A single property consisting of key and value"""
 
@@ -111,6 +113,7 @@ class KnowledgeGraph(BaseModel):
     rels: List[Relationship] = Field(
         ..., description="List of relationships in the knowledge graph"
     )
+
 
 parser = PydanticOutputParser(pydantic_object=KnowledgeGraph)
 
@@ -218,7 +221,7 @@ fname = None
 dok = None
 data = ""
 for doc in docs:
-    fname = Path(doc.metadata['source'])
+    fname = Path(doc.metadata["source"])
     if Path(output_folder / f"{fname.stem}.txt").exists():
         continue
     if not bool(dok):
@@ -229,11 +232,10 @@ for doc in docs:
         with open(output_folder / f"{fname.stem}.txt", "w") as f:
             f.write(data)
         data = ""
-    
-    
+
     # print(f"{fname.stem}_{counter}.txt")
     counter += 1
-    data += ("\n" + data)
+    data += "\n" + data
 
 from pypdf import PdfReader
 

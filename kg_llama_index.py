@@ -1,11 +1,9 @@
-
 import os
 import logging
 import sys
 import pandas as pd
-logging.basicConfig(
-    stream=sys.stdout, level=logging.INFO
-)  
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 # from langchain.docstore.document import Document
 from llama_index import Document
 from llama_index import (
@@ -26,7 +24,7 @@ from llama_index.embeddings import OllamaEmbedding
 
 
 # llm = OpenAI(temperature=0, model="gpt-3.5-turbo-16k")
-#llm = Ollama(temperature=0, model="mistral")
+# llm = Ollama(temperature=0, model="mistral")
 
 llm = Ollama(model="mistral", temperature=0.0, context_window=4900, request_timeout=300)
 embedding_llm = OllamaEmbedding(model_name="mistral")
@@ -37,9 +35,7 @@ from llama_index import SimpleDirectoryReader
 
 os.environ["NEBULA_USER"] = "root"
 os.environ["NEBULA_PASSWORD"] = "nebula"
-os.environ[
-    "NEBULA_ADDRESS"
-] = "127.0.0.1:9669"
+os.environ["NEBULA_ADDRESS"] = "127.0.0.1:9669"
 
 
 # reader = SimpleDirectoryReader(input_dir="../data/knowledge graphs/rebel_llamaindex/wiki/")
@@ -58,14 +54,14 @@ for fname, doc in docs:
 
         if len(block) + len(content) <= 4000:
             # page_count += len(content)
-            block += (" " + content)
+            block += " " + content
             page_content = block
-        else: 
+        else:
             # print("page_content: ", fname, len(page_content))
             # page_count = 0
             block = content
         d = Document(
-            text = page_content,
+            text=page_content,
             # source=fname,
             # get_doc_id=fname,
         )
@@ -75,9 +71,7 @@ for fname, doc in docs:
 
 
 space_name = "covid_relationships"
-edge_types, rel_prop_names = ["relationship"], [
-    "relationship"
-]  
+edge_types, rel_prop_names = ["relationship"], ["relationship"]
 tags = ["entity"]
 
 # graph_store = NebulaGraphStore(
