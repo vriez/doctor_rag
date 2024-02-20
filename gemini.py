@@ -1108,7 +1108,7 @@ for i_f in input_files:
     # data = " ".join(doc["text"].values)
     with open(i_f, "r") as f:
         data = f.read()
-    
+
     sem_data = sem_chain.invoke({"unstructured_text": data})
     print(sem_data)
 
