@@ -156,7 +156,7 @@ def correct_morphology(text):
 
 def pipeline(document):
 
-    doc = delete_images_and_tables(document)
+    # doc = delete_images_and_tables(document)
     # doc = select_text_smaller(doc)
     # doc = select_text_greater(doc)
     doc = document
@@ -164,65 +164,108 @@ def pipeline(document):
     attachments = []
     show = False
     data = []
-    keywords = ["abstract", "introduction", "summary"]
+    aux = []
+    keywords = ["abstract", "introduction", "summary", "background", "a b s t r a c t"]
     # is_present = any(keyword in p.text.lower() for keyword in keywords)
     last_data = ""
     for p in doc.paragraphs:
+        
+        # if p.text.startswith("Similarly"):
+        #     # continue
+
+        if p.text == "":
+            continue
+        # print(p.text)
+        #         print(show)
+
+        # print("p.text 1", p.text)
         if starts_with_table(p.text) or starts_with_figure(p.text):
             attachments.append(p.text)
             continue
-
+        
+        # print("p.text 2")
         if p.text.upper() == "REFERENCES":
             show = False
-            continue
+            break
+        # print("p.text 2")
+        
+        aux.append(p.text)
 
         if show is False:
-
             if any(keyword in p.text.lower() for keyword in keywords):
                 show = True
+                data.append(p.text)
                 continue
 
         if p.text.isnumeric():
             continue
-        if p.text.upper() == p.text:
+
+        # if p.text.upper() == p.text:
+        #     # print(p.text)
+        #     continue
+        
+        # print("p.text 2")
+
+        if show:
+            # print(p.text)
+            # if is_finished(p.text):
+            #     # print("is finished")
+            #     last_data += " " + p.text
+            #     # print(last_data)
+            #     # continuous_text = merge_lowercase_with_hyphen(last_data)
+            #     # morph_text = correct_morphology(continuous_text)
+            #     # last_data = remove_consecutive_whitespaces(last_data).strip()
+            #     last_data = last_data.strip()
+            #     # clean_text = remove_spaces_around_parentheses(clean_text)
+            #     # clean_text = clean_text.strip()
+            #     # clean_text = re.sub(r"\n+", " ", clean_text)
+            #     # clean_sentences = clean_text.strip().replace(". ", ".<|>").split("<|>")
+
+            #     # clean_sentences = text_to_sentences(clean_text)
+
+            #     # data.extend(clean_sentences)
+            #     # print(last_data)
+            #     # print()
+            #     data.append(last_data)
+
+            #     last_data = ""
+            # else:
+            # last_data = p.text.replace("-\n", "")
+            data.append(p.text)
             continue
 
-        if p.text != "" and show:
-            if is_finished(p.text):
-                last_data += " " + p.text
-                # print(last_data)
-                # continuous_text = merge_lowercase_with_hyphen(last_data)
-                # morph_text = correct_morphology(continuous_text)
-                last_data = remove_consecutive_whitespaces(last_data).strip()
-                # clean_text = remove_spaces_around_parentheses(clean_text)
-                # clean_text = clean_text.strip()
-                # clean_text = re.sub(r"\n+", " ", clean_text)
-                # clean_sentences = clean_text.strip().replace(". ", ".<|>").split("<|>")
-
-                # clean_sentences = text_to_sentences(clean_text)
-
-                # data.extend(clean_sentences)
-                # print(last_data)
-                # print()
-                data.append(last_data)
-
-                last_data = ""
-            else:
-                last_data = p.text.replace("-\n", "")
-            # continue
+        # print("p.text 3", show)
+        # print(p.text, show)
+        # if show:
+        #     data.append(p.text)
         # print(last_data)
-    data.extend(attachments)
-    return data
+    # print(attachments)
+    # data.extend(attachments)
+    if len(data) == 0:
+        return aux
+    else:
+        return data
 
 
 input_folder = Path("dataset_docx_ocr")
 
 input_files = input_folder.glob("*.docx")
 
-# input_files = [Path("dataset_docx_ocr/0aefb1158b98bc12005c0f74c9e9987e.docx")]
+input_files = [
+    Path("dataset_docx_ocr/c78dc997dcac438e41018967eda07b4b.docx"),
+    Path("dataset_docx_ocr/5dc298c31c827ab090520d8f613d945d.docx"),
+    Path("dataset_docx_ocr/84e018e77c6b5a5df94845286ce8e2e7.docx"),
+    Path("dataset_docx_ocr/043e94ea8c7f258bbb81ce6fe1f8bfcf.docx"),
+    Path("dataset_docx_ocr/4bde6692f1c62c246729f22cd3a0c09d.docx"),
+    Path("dataset_docx_ocr/212c7af70a5700b7db626d93dbc8a24f.docx")
+    # Path("dataset_docx_ocr/1d9eecbac010038b00fd49fc723ac849.docx") # empty
+]
+
+# input_files = [Path("dataset_docx_ocr/0a337a62de92b3e2717d0f7a454dbe4c.docx")]
 
 # dataset = []
 text_rels_pairs = []
+
 for f in input_files:
     document = Document(f)
     data = pipeline(document)
@@ -237,6 +280,9 @@ for f in input_files:
     #     text_rels_pairs.append(row)
 
     data = " ".join(data)
+    print(data)
+    # data = remove_consecutive_whitespaces(data)
+    # data = data.replace("-\n", "")
 
     #     prompt = f"""
     # given the following context:
@@ -291,7 +337,10 @@ for f in input_files:
 
     #     """
     # print(name, len(data))
-    with open(f"docx_2_text/{f.stem}.txt", "w") as f:
+    # print(data)
+    print()
+    print()
+    with open(f"docx_2_text_1/{f.stem}.txt", "w") as f:
         f.write(data)
     # f_name = f.stem
     # data = list(product([f_name], data))
