@@ -21,6 +21,10 @@ from llama_index.graph_stores import Neo4jGraphStore
 from llama_index.llms import Ollama, OpenAI
 
 from llama_index.embeddings import OllamaEmbedding
+import spacy
+from pathlib import Path
+
+nlp = spacy.load("en_core_web_sm")
 
 
 # llm = OpenAI(temperature=0, model="gpt-3.5-turbo-16k")
@@ -37,40 +41,56 @@ os.environ["NEBULA_USER"] = "root"
 os.environ["NEBULA_PASSWORD"] = "nebula"
 os.environ["NEBULA_ADDRESS"] = "127.0.0.1:9669"
 
+def text_to_sentences(text):
+    doc = nlp(text)
+    sentences = [sent.text.strip() for sent in doc.sents]
+    return sentences
+
 
 # reader = SimpleDirectoryReader(input_dir="../data/knowledge graphs/rebel_llamaindex/wiki/")
 # documents = reader.load_data()
 
-df = pd.read_csv("doc_clean_data.csv")
+# df = pd.read_csv("doc_clean_data.csv")
 
-docs = df.groupby("0")
-documents = []
-for fname, doc in docs:
-    page_count = 0
-    block = ""
-    for i, row in doc.iterrows():
-        content = row["1"]
-        # print(fname, i, len(content))
+# docs = df.groupby("0")
+# documents = []
+# for fname, doc in docs:
+#     page_count = 0
+#     block = ""
+#     for i, row in doc.iterrows():
+#         content = row["1"]
+#         # print(fname, i, len(content))
 
-        if len(block) + len(content) <= 4000:
-            # page_count += len(content)
-            block += " " + content
-            page_content = block
-        else:
-            # print("page_content: ", fname, len(page_content))
-            # page_count = 0
-            block = content
-        d = Document(
-            text=page_content,
-            # source=fname,
-            # get_doc_id=fname,
-        )
-        documents.append(d)
-    page_content = " ".join(doc["1"])
-    # print(fname, len(page_content))
+#         if len(block) + len(content) <= 4000:
+#             # page_count += len(content)
+#             block += " " + content
+#             page_content = block
+#         else:
+#             # print("page_content: ", fname, len(page_content))
+#             # page_count = 0
+#             block = content
+#         d = Document(
+#             text=page_content,
+#             # source=fname,
+#             # get_doc_id=fname,
+#         )
+#         documents.append(d)
+#     page_content = " ".join(doc["1"])
+#     # print(fname, len(page_content))
 
+input_folder = Path("open_ai_processed")
 
-space_name = "covid_relationships"
+input_files = input_folder.glob("*.txt")
+
+for f in input_files:
+
+    with open(f, "r") as fd:
+        data = fd.read()
+
+    data_sentences = text_to_sentences(data)
+    print(data_sentences)
+
+space_name = "coviDy"
 edge_types, rel_prop_names = ["relationship"], ["relationship"]
 tags = ["entity"]
 

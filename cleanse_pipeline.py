@@ -12,9 +12,9 @@ from multiprocessing import Pool
 
 # from generate_rels import *
 
-tool = language_tool_python.LanguageTool(
-    "en-US"
-)  # use a local server (automatically set up), language English
+# tool = language_tool_python.LanguageTool(
+#     "en-US"
+# )  # use a local server (automatically set up), language English
 
 # Load the English language model
 nlp = spacy.load("en_core_web_sm")
@@ -156,7 +156,7 @@ def correct_morphology(text):
 
 def pipeline(document):
 
-    # doc = delete_images_and_tables(document)
+    doc = delete_images_and_tables(document)
     # doc = select_text_smaller(doc)
     # doc = select_text_greater(doc)
     doc = document
@@ -188,7 +188,7 @@ def pipeline(document):
             show = False
             break
         # print("p.text 2")
-        
+
         aux.append(p.text)
 
         if show is False:
@@ -251,22 +251,24 @@ input_folder = Path("dataset_docx_ocr")
 
 input_files = input_folder.glob("*.docx")
 
-input_files = [
-    Path("dataset_docx_ocr/c78dc997dcac438e41018967eda07b4b.docx"),
-    Path("dataset_docx_ocr/5dc298c31c827ab090520d8f613d945d.docx"),
-    Path("dataset_docx_ocr/84e018e77c6b5a5df94845286ce8e2e7.docx"),
-    Path("dataset_docx_ocr/043e94ea8c7f258bbb81ce6fe1f8bfcf.docx"),
-    Path("dataset_docx_ocr/4bde6692f1c62c246729f22cd3a0c09d.docx"),
-    Path("dataset_docx_ocr/212c7af70a5700b7db626d93dbc8a24f.docx")
-    # Path("dataset_docx_ocr/1d9eecbac010038b00fd49fc723ac849.docx") # empty
-]
+# input_files = [
+#     Path("dataset_docx_ocr/c78dc997dcac438e41018967eda07b4b.docx"),
+#     Path("dataset_docx_ocr/5dc298c31c827ab090520d8f613d945d.docx"),
+#     Path("dataset_docx_ocr/84e018e77c6b5a5df94845286ce8e2e7.docx"),
+#     Path("dataset_docx_ocr/043e94ea8c7f258bbb81ce6fe1f8bfcf.docx"),
+#     Path("dataset_docx_ocr/4bde6692f1c62c246729f22cd3a0c09d.docx"),
+#     Path("dataset_docx_ocr/212c7af70a5700b7db626d93dbc8a24f.docx")
+#     Path("dataset_docx_ocr/1d9eecbac010038b00fd49fc723ac849.docx") # empty
+# ]
 
 # input_files = [Path("dataset_docx_ocr/0a337a62de92b3e2717d0f7a454dbe4c.docx")]
-
-# dataset = []
-text_rels_pairs = []
+# input_files = [Path("docx_2_text_1/0ddcfd1cb232030765e364e5064ddcb9.txt")]
+# # dataset = []
+# text_rels_pairs = []
 
 for f in input_files:
+    # if Path(f"docx_2_text_1/{f.stem}.txt").exists():
+    #     continue
     document = Document(f)
     data = pipeline(document)
 
@@ -278,71 +280,29 @@ for f in input_files:
     #         # "ner": rels
     #     }
     #     text_rels_pairs.append(row)
-
     data = " ".join(data)
-    print(data)
-    # data = remove_consecutive_whitespaces(data)
-    # data = data.replace("-\n", "")
+    with open(f"docx_2_txt_2/{f.stem}.txt", "w") as fd:
+        fd.write(data)
+#     # data = data.replace("-\n", "")
+#     # data = remove_consecutive_whitespaces(data)
+#     # print(data)
 
-    #     prompt = f"""
-    # given the following context:
+#     prompt = f"""given the following text:
 
-    # {data}
+# {data}
 
-    # perform the procedure below:
+# correct the punctuation, spelling and typos. place the blocks of text that prevents the sentences to be semantically coherent, maintain the original sentence, to the end of the text after a `\n\n` pause.
+# make sure that no content is lost nor added.
 
-    # 1. correct the punctuation, spelling and typos.
-    # 2. camel-case exclusively all entities, e.g., noun-phrases, nouns, concepts, percentages, p-values, ranges, dosages, concentrations, techniques, methodologies, time periods, time ranges, age ranges, authors, scientific references and other clinical trial related parameters; consider the biomedical context, following the guidelines:
-    #     a- an entity must represent a specific semantic meaning
-    #     b- an entity must not start with a preposition
-    #     c- an entity should not be too long
-    #     d- a camel-cased entity must contain at most 3 nouns
-    #     e- all adjectives must be present in the output
-
-    # 3. snake-case exclusively all phrasal verbs, prepositional verbs, verb-particle constructions, inseparable phrasal verbs, idiomatic verbs, idiomatic expressions, two consecutive verbs and modal verbs, following the guidelines:
-    #     a- verbs must only be concatenated with other surrounding verbs, copulas and prepositions
-    #     b- adverbs must not be concatenated with a noun
-    #     c- a snake-cased verbs must contain no nouns nor articles
-
-    # have you overlooked any of the 2.a, 2.b, 2.c or 2.d, 2.e guidelines? make all necessary corrections.
-    # have you overlooked any of the 3.a, 3.b or 3.c guidelines? make all necessary corrections.
-
-    # no words can be removed from the corrected context
-    # no words can be added to the corrected context
-
-    # ensure all phrasal verbs are snake-cased
-    # ensure all prepositional verbs are snake-cased
-    # ensure all verb-particle constructions are snake-cased
-    # ensure all inseparable phrasal verbs are snake-cased
-    # ensure all idiomatic verbs are snake-cased
-    # ensure all idiomatic expressions are snake-cased
-    # ensure all consecutive verbs are snake-cased
-    # ensure all modal verbs are snake-cased
-
-    # ensure all noun-phrases are camel-cased
-    # ensure all nouns are camel-cased
-    # ensure all concepts are camel-cased
-    # ensure all percentages are camel-cased
-    # ensure all p-values are camel-cased
-    # ensure all ranges are camel-cased
-    # ensure all dosages are camel-cased
-    # ensure all concentrations are camel-cased
-    # ensure all techniques are camel-cased
-    # ensure all methodologies are camel-cased
-    # ensure all time periods are camel-cased
-    # ensure all time ranges are camel-cased
-    # ensure all age ranges are camel-cased
-    # ensure all authors are camel-cased
-    # ensure all scientific references are camel-cased
-
-    #     """
-    # print(name, len(data))
-    # print(data)
-    print()
-    print()
-    with open(f"docx_2_text_1/{f.stem}.txt", "w") as f:
-        f.write(data)
-    # f_name = f.stem
+# is the output correct?
+# """
+#     # print(name, len(data))
+#     # print(data)
+#     print()
+#     print()
+#     with open(f"prompts/{f.stem}.txt", "w") as f:
+#         f.write(prompt)
+#     # f_name = f.stem
     # data = list(product([f_name], data))
     # dataset.extend(data)
     # print(pd.DataFrame(text_rels_pairs))
@@ -375,3 +335,28 @@ for f in input_files:
 
 # # Save the DataFrame to CSV
 # df.to_csv("doc_clean_parallel_data.csv", index=None)
+
+
+# chunked_folder = Path("chunked_4000")
+# chunked_files = chunked_folder.glob("*.txt")
+
+# for f in chunked_files:
+
+#     with open(f, "r") as fd:
+#         text = fd.read()
+
+#     prompt = f"""given the text below:
+
+# {text}
+
+# correct the punctuation, spelling, orthography and typos.
+# then, place the blocks of text that prevent the sentences to be semantically coherent, to the end of the text after a line break followed by`gobbledygook:` pause.
+# the corrected text should contain no line breaks, no symbols that are not present in the original text.
+# the corrected text is a standard text file, no markdown language should be present.
+# get rid of any table or tabular data, e.g.: 2 (11.11) 16 (88.89) 5 (27.78) 2 (11.11) 11 (61.11) 2 (11.11) 16 (88.89)
+# get rid of all references.
+# get rid of all text that is detrimental for the contextual understanding of the text.
+# make sure that no information is lot or added, but re-arranged.
+#     """
+#     with open(f"prompt_4000/{f.stem}.txt", "w") as fd:
+#         fd.write(prompt)
