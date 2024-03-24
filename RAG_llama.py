@@ -9,7 +9,6 @@ from pathlib import Path
 from llama_index import (
     KnowledgeGraphIndex,
     ServiceContext,
-    SimpleDirectoryReader,
 )
 from llama_index import Document
 from multiprocessing import Pool
@@ -43,34 +42,36 @@ service_context = ServiceContext.from_defaults(
     embed_model=embedding_llm,
 )
 
-# os.environ["NEBULA_USER"] = "root"
-# os.environ["NEBULA_PASSWORD"] = "nebula"
-# os.environ["NEBULA_ADDRESS"] = "127.0.0.1:9669"
-
 space_name = "llamaindex"
 edge_types, rel_prop_names = ["relationship"], ["relationship"]  # default, could be omit if create from an empty kg
 tags = ["entity"]  # default, could be omit if create from an empty kg
 
-# graph_store = NebulaGraphStore(space_name=space_name, edge_types=edge_types, rel_prop_names=rel_prop_names, tags=tags)
+# 512
 # username = "neo4j"
-# password = "highways-greenwich-store"
-# url = "bolt://44.204.173.145:7687"
+# password = "mints-indication-topic"
+# url = "bolt+s://d1d75140b2b1d7fd08d143a30d6c2730.neo4jsandbox.com:7687"
 # database = "neo4j"
 
+
+# 1500
 username = "neo4j"
-password = "password"
-url = "neo4j://localhost:7687"
+password = "letterhead-butters-clips"
+url = "bolt+s://c5ddd8a8c31c239cc0ba42fe96f5bb17.neo4jsandbox.com:7687"
 database = "neo4j"
 
-data_folder = Path("/home/vitor/Downloads/converted_treated-20240308T134901Z-001")
+# username = "neo4j"
+# password = "password"
+# url = "neo4j://localhost:7687"
+# database = "neo4j"
 
-data_files = data_folder.rglob("*.txt")
-
-df = pd.read_csv("sentences.csv")
+df = pd.read_csv("sentences_syn.csv")
+df["text"]
 df.reset_index(drop=True)
 df["size"] = df["text"].str.len()
 
-chunk_size = 512
+chunk_size = 1500
+
+
 chunks = []
 documents = []
 files = df.groupby("fname")
@@ -80,74 +81,25 @@ for f_name, f_content in files:
         size = len(row.text)
         if size > chunk_size:
             chunks.append(row.text)
-            metadata = {"source": f_name, "created_at": "2024-03-21"}
+            metadata = {"source": f_name, "block_size": chunk_size, "size": len(chunk), "start": i, "end": i + 1}
+            # print(metadata)
             doc = Document(text=row.text, metadata=metadata)
             documents.append(doc)
             continue
         elif len(chunk) + size > chunk_size:
             chunks.append(chunk)
-            metadata = {"source": f_name, "created_at": "2024-03-21"}
+            metadata = {"source": f_name, "block_size": chunk_size, "size": len(chunk), "start": start, "end": i + 1}
+            # print(metadata)
             doc = Document(text=chunk, metadata=metadata)
             documents.append(doc)
             chunk = ""
+            # start = i+1
+            continue
         else:
             chunk += " " + row.text
+        start = i
 
-# for c in chunks:
-# 	print(len(c))
-# 	metadata = {"source": fname.stem, "created_at": "2024-03-21"}
-# 	doc = Document(
-#         text=c,
-#         metadata=metadata,
-#         # source=fname.stem
-#         # get_doc_id=fname.stem,
-#     )
-
-
-#     # get_doc = lambda self: fname.stem
-#     # setattr(doc, 'get_doc_id', get_doc_id)
-
-#     # doc.get_doc_id = get_doc
-
-#     documents.append(doc)
-
-# documents = []
-# for fname in data_files:
-
-#     with open(fname, "r") as fd:
-#         data = fd.read()
-
-#     metadata = {"source": fname.stem, "created_at": "2024-03-21"}
-#     doc = Document(
-#         text=data,
-#         metadata=metadata,
-#         # source=fname.stem
-#         # get_doc_id=fname.stem,
-#     )
-
-
-#     # get_doc = lambda self: fname.stem
-#     # setattr(doc, 'get_doc_id', get_doc_id)
-
-#     # doc.get_doc_id = get_doc
-
-#     documents.append(doc)
-
-# print(documents)
-
-# splitter = SentenceSplitter(
-#     chunk_size=1024,
-#     chunk_overlap=20,
-# )
-# nodes = splitter.get_nodes_from_documents(documents)
-# # nodes = slides_parser.get_nodes_from_documents(documents)
-# for i, node in enumerate(nodes):
-#     get_doc = lambda self: i
-#     # setattr(nodes[i], 'get_doc_id', get_doc)
-#     nodes[i].get_doc_id = get_doc
-
-# print(dir(nodes[-1]))
-
+        
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
@@ -160,16 +112,18 @@ for doc in tqdm(documents, total=len(documents)):
         kg_index = KnowledgeGraphIndex.from_documents(
             documents=[doc],
             storage_context=storage_context,
-            max_triplets_per_chunk=60,
+            #max_triplets_per_chunk=max_triplets_per_chunk,
             service_context=service_context,
             space_name=space_name,
             edge_types=edge_types,
             rel_prop_names=rel_prop_names,
             tags=tags,
-            include_embeddings=True
+            include_embeddings=True,
+            timeout=60,
         )
     except:
-        print("FAIL: ", doc.metadata, "\n", doc)
+        print("FAIL: ", doc.metadata)
+        print(doc.text)
         print()
         print()
 
