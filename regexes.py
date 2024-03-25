@@ -100,7 +100,6 @@
 ` °C` -> `°C`
 (\d+)\] -> remove all surrounding occurences
  \b[a-zA-Z]+\s*\d+,\d+(?:,\d+)*\.
-
-
+([^\w\d\.])\.(\d{1,5})
 
  U+2424
