@@ -48,15 +48,17 @@ tags = ["entity"]  # default, could be omit if create from an empty kg
 
 # 512
 # username = "neo4j"
+# chunk_size = 512
 # password = "mints-indication-topic"
-# url = "bolt+s://d1d75140b2b1d7fd08d143a30d6c2730.neo4jsandbox.com:7687"
+# url = "bolt://54.146.178.190:7687"
 # database = "neo4j"
 
 
-# 1500
+# 1536
 username = "neo4j"
+chunk_size = 1536
 password = "letterhead-butters-clips"
-url = "bolt+s://c5ddd8a8c31c239cc0ba42fe96f5bb17.neo4jsandbox.com:7687"
+url = "bolt://44.220.84.232:7687"
 database = "neo4j"
 
 # username = "neo4j"
@@ -69,39 +71,35 @@ df["text"]
 df.reset_index(drop=True)
 df["size"] = df["text"].str.len()
 
-chunk_size = 1500
-
-
 chunks = []
 documents = []
 files = df.groupby("fname")
 for f_name, f_content in files:
     chunk = ""
     for i, row in f_content.iterrows():
-        size = len(row.text)
+        content = row.text
+        size = len(content)
         if size > chunk_size:
-            chunks.append(row.text)
+            chunks.append(content)
             metadata = {"source": f_name, "block_size": chunk_size, "size": len(chunk), "start": i, "end": i + 1}
-            # print(metadata)
-            doc = Document(text=row.text, metadata=metadata)
+            doc = Document(text=content.lower(), metadata=metadata)
             documents.append(doc)
             continue
         elif len(chunk) + size > chunk_size:
             chunks.append(chunk)
             metadata = {"source": f_name, "block_size": chunk_size, "size": len(chunk), "start": start, "end": i + 1}
-            # print(metadata)
-            doc = Document(text=chunk, metadata=metadata)
+            doc = Document(text=chunk.lower(), metadata=metadata)
             documents.append(doc)
             chunk = ""
             # start = i+1
             continue
         else:
-            chunk += " " + row.text
+            chunk += " " + content
         start = i
 
-        
+
 graph_store = Neo4jGraphStore(
-    username=username, password=password, url=url, database=database
+    username=username, password=password, url=url
 )
 storage_context = StorageContext.from_defaults(graph_store=graph_store)
 
