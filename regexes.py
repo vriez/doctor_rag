@@ -91,6 +91,7 @@
 ≥
 “
 ”
+✱ -> *
 ±
 (?<!\S)\b\w{1,15},\w+(?!\S)
 (?<=\d),(?=\d{3}(?!\d)) -> ``
@@ -101,5 +102,7 @@
 (\d+)\] -> remove all surrounding occurences
  \b[a-zA-Z]+\s*\d+,\d+(?:,\d+)*\.
 ([^\w\d\.])\.(\d{1,5})
-
+`(?<=\d) months` -> `__months`
+`(?<=\d) days` -> `__days`
+`(?<=\d) years` -> `__years`
  U+2424
