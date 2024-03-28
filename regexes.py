@@ -106,3 +106,4 @@
 `(?<=\d) days` -> `__days`
 `(?<=\d) years` -> `__years`
  U+2424
+`\w{4,6}(?<!\d)\d{1,3} ` -> removed the number when applicable
