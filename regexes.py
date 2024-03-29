@@ -4,16 +4,12 @@
 (?:\d+\.\d+|\d+)(?:\s+(?:\d+\.\d+|\d+)){2,} used again two or more consecutive numbers (any type) separated by whitespace
 (?:\s|^)(-?\d+(\.\d+)?\s+){3,}
 (?:\b\d+(?:\.\d+)?(?: \(\d+(?:\.\d+)?%?\))(?:\s+|$)){2,} useda againtables with percentiles
- ?:\s+–?\d+(?:\.\d+)?(?:\s+\d+\s+\(\d+(?:\.\d+)?\))?\s*){3,} tabular data\b\d+\s+of\s+\d+\b
+?:\s+–?\d+(?:\.\d+)?(?:\s+\d+\s+\(\d+(?:\.\d+)?\))?\s*){3,} tabular data\b\d+\s+of\s+\d+\b
 (?:\s+–?\d+(?:\.\d+)?(?:\s+\d+\s+\(\d+(?:\.\d+)?\))?\s*){2,}
- \b\d+\s+of\s+\d+\b
-
-
-
+\b\d+\s+of\s+\d+\b
 `\d+,\d+(?:,\d+)*\. ` -> `. `
 `\.\d+,\d+(?:,\d+)*` -> `.`
 `-\n` -> ``
-
 `\[(\s*\d+(?:,\s*\d+)*\s*)\]` -> ``
 `\[(\d+(?:,\d+)*)\]` -> ``
 `\[(\d+)-(\d+)\]` -> ``
@@ -23,13 +19,11 @@
 `\((\d{2})–(\d{2})\)`-> ``
 `\.(\d{2})–(\d{2}) ` -> `. `
 `(\d{2})–(\d{2})\. ` -> `.`
-  
 `[A-Z](\d{2}),(\d{2}) `
-       
 `[a-z](\d{2}) `
 `[a-zA-Z]+\.([\d+,]+)-(\d+) `
 `[a-zA-Z]+\.([\d+,]+)–(\d+) `
- `\s{2,}` -> ` ` 
+`\s{2,}` -> ` ` 
 `\[\d+([,-]\d+)+\]` -> ``
 `\b\d{2},\d{2}(?:,\d{2})*\b ` -> ``
 ` \[\d+([,–]\d+)+\]` -> ``
@@ -54,17 +48,14 @@
 `�` -> `≥`
 `⁄`-> `/`
 `’’` -> 
-
 `nmol / L` -> `nmol/L`
 `nmol L 1` -> `nmol/L`
 `nmol L-1` -> `nmol/L`
 `nmol l−1` -> `nmol/L`
-
 `^(?!.*(?:\.|\.")$).+` -> manually bring the line below, up.
 `.’` -> `’.`
 `.”` -> `”.`
 `­ ` -> `` U+00AD is the Unicode code point for the soft hyphen (SHY) character
-
 `	 `
 앐
 `ﬁ` -> `fi`
@@ -86,7 +77,7 @@
  -> ≥
 ◦ -> °
 쏝 -> <
- ҃ 
+҃ 
 ≤
 ≥
 “
@@ -100,10 +91,11 @@
 `¼` -> `=`
 ` °C` -> `°C`
 (\d+)\] -> remove all surrounding occurences
- \b[a-zA-Z]+\s*\d+,\d+(?:,\d+)*\.
+\b[a-zA-Z]+\s*\d+,\d+(?:,\d+)*\.
 ([^\w\d\.])\.(\d{1,5})
 `(?<=\d) months` -> `__months`
 `(?<=\d) days` -> `__days`
 `(?<=\d) years` -> `__years`
- U+2424
+U+2424
 `\w{4,6}(?<!\d)\d{1,3} ` -> removed the number when applicable
+`\w{4,6}(?<!\d)\d{1,3} ` -> removed the number
