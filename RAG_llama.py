@@ -14,8 +14,10 @@ from llama_index import Document
 from multiprocessing import Pool
 from llama_index.llms import Gemini, Ollama
 from IPython.display import Markdown, display
+
 # LangChain supports many other chat models. Here, we're using Ollama
 from llama_index.graph_stores import Neo4jGraphStore
+
 # from langchain_community.chat_models import ChatOllama
 from llama_index.storage.storage_context import StorageContext
 from llama_index.embeddings.google import GoogleUnivSentEncoderEmbedding
@@ -43,7 +45,9 @@ service_context = ServiceContext.from_defaults(
 )
 
 space_name = "llamaindex"
-edge_types, rel_prop_names = ["relationship"], ["relationship"]  # default, could be omit if create from an empty kg
+edge_types, rel_prop_names = ["relationship"], [
+    "relationship"
+]  # default, could be omit if create from an empty kg
 tags = ["entity"]  # default, could be omit if create from an empty kg
 
 # 512
