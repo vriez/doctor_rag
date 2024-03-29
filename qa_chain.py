@@ -33,9 +33,13 @@ graph = Neo4jGraph(url=url, username=username, password=password)
 # # qa_model = ChatOllama(model="mistral", temperature=0.0)
 # qa_model = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
 
-cypher_model = ChatVertexAI(model_name="gemini-pro", temperature=0.0, convert_system_message_to_human=True)
+cypher_model = ChatVertexAI(
+    model_name="gemini-pro", temperature=0.0, convert_system_message_to_human=True
+)
 # qa_model = ChatOllama(model="mistral", temperature=0.0)
-qa_model = ChatVertexAI(model_name="gemini-pro", temperature=0.0, convert_system_message_to_human=True)
+qa_model = ChatVertexAI(
+    model_name="gemini-pro", temperature=0.0, convert_system_message_to_human=True
+)
 
 cypher_chain = GraphCypherQAChain.from_llm(
     graph=graph,

@@ -27,6 +27,7 @@ import spacy
 # Load the English language model
 nlp = spacy.load("en_core_web_sm")
 
+
 class Property(BaseModel):
     """A single property consisting of key and value"""
 
@@ -1007,7 +1008,7 @@ is the output correct?
 
 
 def prompt_it(data):
-  data = f"""given the text below:
+    data = f"""given the text below:
 
 {data}
 
@@ -1091,7 +1092,8 @@ ensure that the corrected text contains no typos, no spelling errors and no orth
 ensure that the corrected text contains only complete, cohesive and correct sentences.
 ensure that the corrected text contains no line breaks
 """
-  return data
+    return data
+
 
 # You are an assistant that will help parsing a messing text into well formed, correct sentences from the input text
 fix_text_prompt = """given the text below:
@@ -1181,11 +1183,13 @@ ensure that the corrected text contains no line breaks
 {{ format_instructions }}
 """
 
+
 def text_to_sentences(text):
-    
+
     doc = nlp(text)
     sentences = [sent.text.strip() for sent in doc.sents]
     return sentences
+
 
 response_schemas = [
     ResponseSchema(name="corrected_text", description="the correctly punctuated text.")
@@ -1258,10 +1262,8 @@ for f in input_files:
     with open(f, "r") as fd:
         data = fd.read()
 
-
-    # with open(f"prompt_gemini_full/{f.stem}.txt", "w") as fd:
-    #     fd.write(prompt)
-
+        # with open(f"prompt_gemini_full/{f.stem}.txt", "w") as fd:
+        #     fd.write(prompt)
 
         data_sents = text_to_sentences(data)
         chunk = ""
@@ -1280,46 +1282,48 @@ for f in input_files:
         chunks.append(chunk)
 
         for block_id, c in enumerate(chunks):
-          # try:
-          #   sem_data = sem_chain.invoke({"unstructured_text": data})
-          # except Exception as e:
-          #   print(e, f)
-          #   continue
-          # output = sem_data["corrected_text"]
-          data = prompt_it(c)
-          with open(f"chunked_prompted_{chunk_size}/{f.stem}_{block_id}.txt", "w") as fd:
-            fd.write(data)
-                        
+            # try:
+            #   sem_data = sem_chain.invoke({"unstructured_text": data})
+            # except Exception as e:
+            #   print(e, f)
+            #   continue
+            # output = sem_data["corrected_text"]
+            data = prompt_it(c)
+            with open(
+                f"chunked_prompted_{chunk_size}/{f.stem}_{block_id}.txt", "w"
+            ) as fd:
+                fd.write(data)
+
 # chunked_folder = Path(f"chunked_{chunk_size}")
 # chunked_files = chunked_folder.glob("*.txt")
 
 # for f in chunked_files:
 
-    # if Path(f"gemini_{chunk_size}/{f.stem}.txt").exists():
-    #   continue
+# if Path(f"gemini_{chunk_size}/{f.stem}.txt").exists():
+#   continue
 
-    # with open(f, "r") as fd:
-    #   text = fd.read()
-    # try:
-    #   sem_data = sem_chain.invoke({"unstructured_text": text})
-    # except Exception as e:
-    #   print(e, f)
-    #   continue
-    # # print()
-    # output = sem_data["corrected_text"]
-    # with open(f"gemini_{chunk_size}/{f.stem}.txt", "w") as fd:
-    #   text = fd.write(output)
-    # if Path(f"gemini/{f.stem}.txt").exists():
-    #   continue
+# with open(f, "r") as fd:
+#   text = fd.read()
+# try:
+#   sem_data = sem_chain.invoke({"unstructured_text": text})
+# except Exception as e:
+#   print(e, f)
+#   continue
+# # print()
+# output = sem_data["corrected_text"]
+# with open(f"gemini_{chunk_size}/{f.stem}.txt", "w") as fd:
+#   text = fd.write(output)
+# if Path(f"gemini/{f.stem}.txt").exists():
+#   continue
 
-    # # with open(f, "r") as fd:
-    # # #   text = fd.read()
-    # try:
-    #   sem_data = sem_chain.invoke({"unstructured_text": data})
-    # except Exception as e:
-    #   print(e, f)
-    #   continue
-    # # print()
-    # output = sem_data["corrected_text"]
-    # # with open(f"gemini/{f.stem}.txt", "w") as fd:
-    # #   text = fd.write(output)
+# # with open(f, "r") as fd:
+# # #   text = fd.read()
+# try:
+#   sem_data = sem_chain.invoke({"unstructured_text": data})
+# except Exception as e:
+#   print(e, f)
+#   continue
+# # print()
+# output = sem_data["corrected_text"]
+# # with open(f"gemini/{f.stem}.txt", "w") as fd:
+# #   text = fd.write(output)

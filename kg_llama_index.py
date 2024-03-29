@@ -41,6 +41,7 @@ os.environ["NEBULA_USER"] = "root"
 os.environ["NEBULA_PASSWORD"] = "nebula"
 os.environ["NEBULA_ADDRESS"] = "127.0.0.1:9669"
 
+
 def text_to_sentences(text):
     doc = nlp(text)
     sentences = [sent.text.strip() for sent in doc.sents]

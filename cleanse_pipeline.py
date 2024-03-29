@@ -169,7 +169,7 @@ def pipeline(document):
     # is_present = any(keyword in p.text.lower() for keyword in keywords)
     last_data = ""
     for p in doc.paragraphs:
-        
+
         # if p.text.startswith("Similarly"):
         #     # continue
 
@@ -182,7 +182,7 @@ def pipeline(document):
         if starts_with_table(p.text) or starts_with_figure(p.text):
             attachments.append(p.text)
             continue
-        
+
         # print("p.text 2")
         if p.text.upper() == "REFERENCES":
             show = False
@@ -203,7 +203,7 @@ def pipeline(document):
         # if p.text.upper() == p.text:
         #     # print(p.text)
         #     continue
-        
+
         # print("p.text 2")
 
         if show:
@@ -303,9 +303,9 @@ for f in input_files:
 #     with open(f"prompts/{f.stem}.txt", "w") as f:
 #         f.write(prompt)
 #     # f_name = f.stem
-    # data = list(product([f_name], data))
-    # dataset.extend(data)
-    # print(pd.DataFrame(text_rels_pairs))
+# data = list(product([f_name], data))
+# dataset.extend(data)
+# print(pd.DataFrame(text_rels_pairs))
 
 # df = pd.DataFrame(text_rels_pairs)
 # print(df)
