@@ -99,3 +99,4 @@
 U+2424
 `\w{4,6}(?<!\d)\d{1,3} ` -> removed the number when applicable
 `\w{4,6}(?<!\d)\d{1,3} ` -> removed the number
+\w{1,5}(?<!\d)\d{1,2} 
