@@ -199,17 +199,10 @@ def process_node(node):
             right_triplets, right_node = [], []
 
         return left_triplets + right_triplets, left_node + right_node
-
-
-# # for doc in tqdm(documents, total=len(documents)):
-# print("L: ", len(nodes))
-# nodes = nodes[12:13]
-# print("L: ", len(nodes))
     
 unsafe = []
 
 for node in tqdm(nodes, total=len(nodes)):
-
     triplets, nodes = process_node(node)
     if triplets == []:
         unsafe.append(nodes)
@@ -220,13 +213,6 @@ for node in tqdm(nodes, total=len(nodes)):
 # kg_index.persist(persist_path="knowledge_graph.json")
 # kg_index = load_index_from_storage(storage_context=storage_context)
 kg_index.storage_context.persist(persist_dir=f'./storage_graph_iter_/{Settings.chunk_size}')
-
-# query_engine = KnowledgeGraphQueryEngine(
-#     storage_context=storage_context,
-#     # service_context=service_context,
-#     llm=llm,
-#     verbose=True,
-# )
 
 query_engine = kg_index.as_query_engine(
     include_text=True,
