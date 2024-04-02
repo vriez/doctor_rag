@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import logging
 import pandas as pd
 from tqdm import tqdm
@@ -46,7 +47,7 @@ Settings.chunk_size = 2048
 
 space_name = "llamaindex"
 edge_types, rel_prop_names = ["relationship"], [
-    "relationship"
+    "property"
 ]  # default, could be omit if create from an empty kg
 tags = ["entity"]  # default, could be omit if create from an empty kg
 database = "neo4j"
@@ -60,10 +61,10 @@ database = "neo4j"
 
 # # 2048 index
 # username = "neo4j"
-# password = "officials-shapes-masks"
-# url = "bolt://3.235.103.212:7687"
-# db_id = "a59005a074b6b1e95f65b0b90df3e003"
-# # bolt+s://a59005a074b6b1e95f65b0b90df3e003.neo4jsandbox.com:7687
+# password = "absences-pin-milligram"
+# url = "bolt://18.233.93.49:7687"
+# db_id = "7d3d267a81aee7b921190a2f09ea292f"
+# # bolt+s://7d3d267a81aee7b921190a2f09ea292f.neo4jsandbox.com:7687
 
 # 2048 contiguous
 username = "neo4j"
@@ -237,7 +238,6 @@ indices = [
 ]
 
 indices_1 = [
-    85,
     86,
     456,
     587,
@@ -261,8 +261,6 @@ indices_1 = [
 ]
 
 indices_2 = [
-    0,
-    1,
     8,
     9,
     11,
@@ -300,34 +298,33 @@ indices.append(indices_5)
 
 counter = 0
 
-# while True:
 print("M: ", len(documents), len(indices), indices)
 first = 0
 print()
-# meta_docs = []
-# for d in documents:
-#     meta_docs.append(d.metadata)
+meta_docs = []
+for d in documents:
+    meta_docs.append(d.metadata)
 
-# pd.DataFrame(meta_docs).to_csv("original.csv", index=None)
+pd.DataFrame(meta_docs).to_csv("original.csv", index=None)
 
-for indixes in indices:
+# for indixes in indices:
     
-    replacements = {i: documents[i].split() for i in indixes}
-    print("i: ", [ l + first for l in indixes ])
-    sliced_documents = documents
-    for j, x in enumerate(documents):
-        if j not in replacements:
-            # sliced_documents.append(x)
-            pass
-        else:
-            sliced_documents.extend(replacements[j])
-    documents = sliced_documents
-    # docs.append(documents)
+#     replacements = {i: documents[i].split() for i in indixes}
+#     print("i: ", [ l + first for l in indixes ])
+#     sliced_documents = documents
+#     for j, x in enumerate(documents):
+#         if j not in replacements:
+#             # sliced_documents.append(x)
+#             pass
+#         else:
+#             sliced_documents.extend(replacements[j])
+#     documents = sliced_documents
+#     # docs.append(documents)
 
-# for k in docs:
-#     print(len(k))
+# # for k in docs:
+# #     print(len(k))
 
-print(len(documents))
+# print(len(documents))
 # meta_docs = []
 # for d in documents:
 #     meta_docs.append(d.metadata)
@@ -337,56 +334,62 @@ print(len(documents))
 # print(docs)
 # sys.exit(0)
 
-documents = documents[85:]
-kg_index = KnowledgeGraphIndex.from_documents(
-    documents,
-    storage_context=storage_context,
-    max_triplets_per_chunk=80,
-    space_name=space_name,
-    edge_types=edge_types,
-    rel_prop_names=rel_prop_names,
-    tags=tags,
-    show_progress=True,
-    include_embeddings=True,
-)
+indices = []
+track = []
+docs = []
+counter = 0
+processed = []
 
-# indices = []
+# documents = documents[85:]
+while counter < 6:
+    print("it: ", counter)
+    for i, doc in tqdm(enumerate(documents), total=len(documents)):
+        try:
+            kg_index = KnowledgeGraphIndex.from_documents(
+                [doc],
+                storage_context=storage_context,
+                max_triplets_per_chunk=240,
+                space_name=space_name,
+                edge_types=edge_types,
+                rel_prop_names=rel_prop_names,
+                tags=tags,
+                show_progress=True,
+                include_embeddings=True,
+            )
+            processed.append(doc.metadata)
+        except google.generativeai.types.generation_types.BlockedPromptException as e:
+            print(e)
+            docs.append(doc)
+            track.append(doc.metadata)
+        except google.generativeai.types.generation_types.StopCandidateException as e:
+            docs.extend(doc.split())
+            print("splitted documents ", i)
+            track.append(doc.metadata)
+        except Exception as e:
+            print(e)
+            time.sleep(3)
+    
+    documents = docs
+    docs = []
+    counter += 1
 
-# for i, doc in enumerate(documents):
-#     try:
-#         kg_index = KnowledgeGraphIndex.from_documents(
-#             [doc],
-#             storage_context=storage_context,
-#             max_triplets_per_chunk=80,
-#             space_name=space_name,
-#             edge_types=edge_types,
-#             rel_prop_names=rel_prop_names,
-#             tags=tags,
-#             # show_progress=True,
-#             include_embeddings=True,
-#         )
-#     except google.generativeai.types.generation_types.BlockedPromptException as e:
-#         print(e)
-#     except google.generativeai.types.generation_types.StopCandidateException as e:
-#         print(e)
-#         indices.append(i)
-#     except Exception as e:
-#         print(e)
+# print(track)
+# print(indices)
 # counter += 1
 # pd.DataFrame(indices).to_csv(f"indices__{start_from}_{go_until}__{counter}.csv", index=None)
 
-kg_index.persist(persist_path="knowledge_graph.json")
+# kg_index.persist(persist_path="knowledge_graph__index.json")
 # kg_index = load_index_from_storage(storage_context=storage_context)
-kg_index.storage_context.persist(persist_dir=f'./storage_graph_splitted__{Settings.chunk_size}')
+kg_index.storage_context.persist(persist_dir=f'./storage_graph_index__{Settings.chunk_size}')
 
-# query_engine = kg_index.as_query_engine(
-#     include_text=True,
-#     response_mode="tree_summarize",
-#     embedding_mode="hybrid",
-#     similarity_top_k=5,
-# )
+query_engine = kg_index.as_query_engine(
+    include_text=True,
+    response_mode="tree_summarize",
+    embedding_mode="hybrid",
+    similarity_top_k=5,
+)
 
-# response = query_engine.query(
-#     "Tell me about the relationship between Vitamind D and Covid?",
-# )
-# display(Markdown(f"<b>{response}</b>"))
+response = query_engine.query(
+    "Tell me about the relationship between Vitamind D and Covid?",
+)
+display(Markdown(f"<b>{response}</b>"))
