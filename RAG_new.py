@@ -21,9 +21,11 @@ from llama_index.core.indices.knowledge_graph.base import (
 )
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from neo4j import exceptions
+
 # from llama_index.core.query_engine import KnowledgeGraphQueryEngine
 from llama_index.core import load_index_from_storage
 from utils import dataset
+
 # from anti_woke import *
 import threading
 
@@ -96,6 +98,44 @@ kg_index = KnowledgeGraphIndex(
 )
 
 
+def split(node):
+    start = node.metadata.get("start")
+    end = node.metadata.get("end")
+
+    mid = start + (end - start) // 2
+
+    left_text = " ".join(df.iloc[start:mid, 2].tolist()).lower().strip()
+    right_text = " ".join(df.iloc[mid:end, 2].tolist()).lower().strip()
+
+    left_metadata = node.metadata.copy()
+    left_metadata.update(
+        {
+            "block_size": Settings.chunk_size,
+            "size": len(left_text) + 1,
+            "start": start,
+            "end": mid,
+        }
+    )
+
+    right_metadata = node.metadata.copy()
+    right_metadata.update(
+        {
+            "block_size": Settings.chunk_size,
+            "size": len(right_text) + 1,
+            "start": mid + 1,
+            "end": end,
+        }
+    )
+
+    left_node = Node(text=left_text, metadata=left_metadata)
+    right_node = Node(text=right_text, metadata=right_metadata)
+
+    return [left_node, right_node]
+
+
+setattr(Node, "split", split)
+
+
 def extract_triplets(node):
     triplets = kg_index._extract_triplets(node.text)
     return list(set(triplets)), [node]
@@ -107,45 +147,15 @@ def process_node(node):
         triplets, node = extract_triplets(node)
         return triplets, node
     except Exception as e:
-        # print(e)
+        print(e)
+        left_node, right_node = node.split()
 
-        start = node.metadata.get("start")
-        end = node.metadata.get("end")
-
-        mid = start + (end - start) // 2
-
-        left_text = " ".join(df.iloc[start:mid, 2].tolist()).lower().strip()
-        right_text = " ".join(df.iloc[mid:end, 2].tolist()).lower().strip()
-
-        left_metadata = node.metadata.copy()
-        left_metadata.update(
-            {
-                "block_size": Settings.chunk_size,
-                "size": len(left_text) + 1,
-                "start": start,
-                "end": mid,
-            }
-        )
-
-        right_metadata = node.metadata.copy()
-        right_metadata.update(
-            {
-                "block_size": Settings.chunk_size,
-                "size": len(right_text) + 1,
-                "start": mid + 1,
-                "end": end,
-            }
-        )
-
-        left_node = Node(text=left_text, metadata=left_metadata)
-        right_node = Node(text=right_text, metadata=right_metadata)
-
-        if len(left_text) > 0:
+        if len(left_node.text) > 0:
             left_triplets, left_node = process_node(left_node)
         else:
             left_triplets, left_node = [], []
 
-        if len(right_text) > 0:
+        if len(right_node.text) > 0:
             right_triplets, right_node = process_node(right_node)
         else:
             right_triplets, right_node = [], []
