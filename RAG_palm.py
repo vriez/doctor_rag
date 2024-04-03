@@ -178,6 +178,7 @@ storage_context = StorageContext.from_defaults(graph_store=graph_store)
 #     include_embeddings=True,
 # )
 
+
 def split(node):
     start = node.metadata.get("start")
     end = node.metadata.get("end")
@@ -212,12 +213,13 @@ def split(node):
 
     return [left_node, right_node]
 
+
 setattr(Document, "split", split)
 
 indices = [
     86,
     86 + 38,
-    86 + 38 + 1, #
+    86 + 38 + 1,  #
     86 + 38 + 1 + 147,
     86 + 38 + 1 + 147 + 67,
     86 + 38 + 1 + 147 + 67 + 116,
@@ -227,37 +229,97 @@ indices = [
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66,
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1,
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1, 
+    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1,
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1, #
+    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1,  #
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95,
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1,
     86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1 + 1 + 10,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1 + 1 + 10 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1 + 1 + 10 + 1 + 117 + 1
+    86
+    + 38
+    + 1
+    + 147
+    + 67
+    + 116
+    + 1
+    + 2
+    + 145
+    + 66
+    + 1
+    + 9
+    + 1
+    + 120
+    + 1
+    + 95
+    + 1
+    + 1
+    + 10,
+    86
+    + 38
+    + 1
+    + 147
+    + 67
+    + 116
+    + 1
+    + 2
+    + 145
+    + 66
+    + 1
+    + 9
+    + 1
+    + 120
+    + 1
+    + 95
+    + 1
+    + 1
+    + 10
+    + 1,
+    86
+    + 38
+    + 1
+    + 147
+    + 67
+    + 116
+    + 1
+    + 2
+    + 145
+    + 66
+    + 1
+    + 9
+    + 1
+    + 120
+    + 1
+    + 95
+    + 1
+    + 1
+    + 10
+    + 1
+    + 117
+    + 1,
 ]
 
-indices_1 = [86,
- 456,
- 587,
- 1225,
- 1342,
- 2057,
- 801,
- 897,
- 909,
- 1822,
- 1891,
- 1029,
- 1030,
- 1032,
- 1036,
- 1037,
- 1176,
- 1192,
- 1194,
- 1445]
+indices_1 = [
+    86,
+    456,
+    587,
+    1225,
+    1342,
+    2057,
+    801,
+    897,
+    909,
+    1822,
+    1891,
+    1029,
+    1030,
+    1032,
+    1036,
+    1037,
+    1176,
+    1192,
+    1194,
+    1445,
+]
 
 
 # replacements = {i: documents[i].split() for i in indices}
@@ -290,7 +352,7 @@ indices_1 = [86,
 
 # print(len(documents))
 # if go_until > len(documents):
-#     go_until = len(documents) - 1 
+#     go_until = len(documents) - 1
 # documents = documents[start_from: go_until]
 # print(len(documents))
 counter = 0
@@ -324,14 +386,14 @@ kg_index = KnowledgeGraphIndex.from_documents(
     show_progress=True,
     include_embeddings=True,
 )
-    # except google.generativeai.types.generation_types.BlockedPromptException as e:
-    #     print(e)
-    # except google.generativeai.types.generation_types.StopCandidateException as e:
-    #     print(e)
-    #     indices.append(i)
-    # except Exception as e:
-    #     print(e)
-    # print(indices)
+# except google.generativeai.types.generation_types.BlockedPromptException as e:
+#     print(e)
+# except google.generativeai.types.generation_types.StopCandidateException as e:
+#     print(e)
+#     indices.append(i)
+# except Exception as e:
+#     print(e)
+# print(indices)
 # counter += 1
 # pd.DataFrame(indices).to_csv(f"indices__{start_from}_{go_until}__{counter}.csv", index=None)
 
