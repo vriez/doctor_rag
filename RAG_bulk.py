@@ -31,8 +31,8 @@ logging.basicConfig(
 )  # logging.DEBUG for more verbose output
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
-start_from = int(sys.argv[1])
-go_until = int(sys.argv[2])
+# start_from = int(sys.argv[1])
+# go_until = int(sys.argv[2])
 # print(f"python RAG_bulk.py {start_from*200} {(start_from+1) * 200} &")
 # sys.exit(0)
 
@@ -46,10 +46,8 @@ Settings.embed_model = embedding_llm
 Settings.chunk_size = 2048
 
 space_name = "doctor_rag_continuous"
-edge_types, rel_prop_names = ["relationship"], [
-    "relationship"
-]  # default, could be omit if create from an empty kg
-tags = ["entity"]  # default, could be omit if create from an empty kg
+edge_types, rel_prop_names = ["relationship"], ["relationship"] 
+tags = ["entity"]
 database = "neo4j"
 
 # 512
@@ -79,23 +77,55 @@ database = "neo4j"
 # # bolt+s://c8ac89364ecd0581662c26ca8fcd869e.neo4jsandbox.com:7687
 
 
+# # 2048 multithreaded index
+# username = "neo4j"
+# password = "machines-electrolytes-troop"
+# url = "bolt://3.239.198.148:7687"
+# # bolt+s://26d1b177537db8832f0d69488ed8fa41.neo4jsandbox.com:7687
+
 # 2048 multithreaded index
 username = "neo4j"
-password = "machines-electrolytes-troop"
-url = "bolt://3.239.198.148:7687"
-# bolt+s://26d1b177537db8832f0d69488ed8fa41.neo4jsandbox.com:7687
+password = "accusation-tube-blueprints"
+url = "bolt://3.91.206.92:7687"
+# bolt+s://bcd95aaad62b7b424b7f0675feac7185.neo4jsandbox.com:7687
 
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
-storage_context = StorageContext.from_defaults(graph_store=graph_store)#, persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
+storage_path = './storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048'
+storage_context = StorageContext.from_defaults(graph_store=graph_store)  #, persist_dir=f'./storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048')
 
 df = pd.read_csv("sentences_syn.csv")
 # df.reset_index(drop=True)
 df["size"] = df["text"].str.len()
 nodes = dataset(df, Settings.chunk_size)
 
-                                               
+# udfs = []
+# for p in Path(".").glob("unprocessed_data*.csv"):
+#     udfs.append(pd.read_csv(p))
+
+# udf = pd.concat(udfs)
+
+# nodes = []
+# fs = udf.groupby("source")
+# for i, m in fs:
+#     # print("M: ", i, m.shape)
+#     for j,v in m.iterrows():
+#         # print("J: ", i, j, v)
+#         start = v["start"]
+#         end = v["end"]
+#         size = v["size"]
+#         text = " ".join(df.iloc[start:end, 2].tolist()).lower()
+#         print("J: ", size, dict(m), len(" ".join(df.iloc[start:end, 2].tolist()).lower()))
+#         node = Document(text=text, metadata={"source": i, "size": size, "start": start, "end": end})
+#         nodes.append(node)
+
+# sliced_nodes = [ ]
+# for n in nodes:
+#     sliced_nodes.extend(n.split())
+
+# nodes = sliced_nodes
+
 kg_index_f = KnowledgeGraphIndex.from_documents(
     [],
     storage_context=storage_context,
@@ -112,20 +142,20 @@ kg_index_f = KnowledgeGraphIndex.from_documents(
 # kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
 kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
                                                                                               
-def extract_triplets(node):
-    triplets = kg_index_f._llm_extract_triplets(node.text)
+def extract_triplets(node, metadata):
+    triplets = kg_index_f._extract_triplets(node.text, metadata)
     return list(set(triplets)), [node]
 
 def process_node(node):
     # print("process_node: ", node)
     triplets = []
     try:
-        triplets, node = extract_triplets(node)
+        triplets, node = extract_triplets(node, node.metadata)
         # return triplets
     # except Exception as e:
     except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
         time.sleep(10)
-        triplets, node = extract_triplets(node)
+        triplets, node = extract_triplets(node, node.metadata)
         # return triplets                                            
     except (google.generativeai.types.generation_types.StopCandidateException, google.generativeai.types.generation_types.BlockedPromptException) as e:
 
@@ -185,8 +215,9 @@ setattr(Document, "split", split)
 unprocessed = []
 triplets_list = []
 def triplet_extractor(text, metadata):
-    global pbar
-    # doc = Document(text=text, metadata=metadata)
+    # global pbar
+
+    doc = Document(text=text, metadata=metadata)
     # triplets = process_node(doc)
     # if triplets == []:
     #     unprocessed.append(metadata)
@@ -194,52 +225,55 @@ def triplet_extractor(text, metadata):
     #     tag = f'{metadata["source"]}__{metadata["start"]}__{metadata["end"]}'
     #     triplets_list.append({"triplets": triplets, "id": tag})
     try:
-        triplets = kg_index_f._llm_extract_triplets(text)
+        # triplets = kg_index_f._llm_extract_triplets(text)
+        triplets = process_node(doc)
         tag = f'{metadata["source"]}__{metadata["start"]}__{metadata["end"]}'
         triplets_list.append({"triplets": triplets, "id": tag})
     except google.generativeai.types.generation_types.BlockedPromptException as e:
         # print(f"FAIL BlockedPromptException for {text}")
-        # print(e)
+        print(e)
         unprocessed.append(metadata)
         triplets = []
     except google.generativeai.types.generation_types.StopCandidateException as e:
         # print(f"FAIL StopCandidateException for {text}")
-        # print(e)
+        print(e)
         unprocessed.append(metadata)
         triplets = []
     except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
         time.sleep(10)
-        # print(e)
-        triplets = triplet_extractor(text, metadata)
+        print(e)
+        triplets = process_node(doc)
     except Exception as e:
         # print(f"FAIL Exception for {text}")
         unprocessed.append(metadata)
-        # print(e)
+        print(e)
         time.sleep(3)
         triplets = []
-    # pbar.update(1)
+    pbar.update(1)
     return triplets
 
-nodes = nodes[start_from: go_until]
-# with tqdm(total=len(nodes)) as pbar:
+# nodes = nodes[start_from: go_until]
+with tqdm(total=len(nodes)) as pbar:
 
-kg_index = KnowledgeGraphIndex.from_documents(
-    nodes,
-    storage_context=storage_context,
-    max_triplets_per_chunk=280,
-    space_name=space_name,
-    edge_types=edge_types,
-    rel_prop_names=rel_prop_names,
-    tags=tags,
-    # show_progress=True,
-    kg_triplet_extract_fn=triplet_extractor,
-    include_embeddings=True,
-    verbose=True
-)
+    kg_index = KnowledgeGraphIndex.from_documents(
+        nodes,
+        storage_context=storage_context,
+        max_triplets_per_chunk=280,
+        space_name=space_name,
+        edge_types=edge_types,
+        rel_prop_names=rel_prop_names,
+        tags=tags,
+        # show_progress=True,
+        kg_triplet_extract_fn=triplet_extractor,
+        include_embeddings=True,
+        verbose=True
+    )
 
 # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
 
-pd.DataFrame(unprocessed).to_csv(f"unprocessed_data__{start_from}_{go_until}.csv", index=None)
+kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
+
+pd.DataFrame(unprocessed).to_csv(f"f_unprocessed_data__{start_from}_{go_until}.csv", index=None)
 
 flat_data = [
     {'subject': triplet[0], 'relation': triplet[1], 'object': triplet[2], 'id': item['id']}
@@ -247,7 +281,7 @@ flat_data = [
 ]
 
 # Convert to DataFrame
-pd.DataFrame(flat_data).to_csv(f"triplets_data__{start_from}_{go_until}.csv", index=None)
+pd.DataFrame(flat_data).to_csv(f"f_triplets_data__{start_from}_{go_until}.csv", index=None)
 
 # # kg_index.persist(persist_path="knowledge_graph.json")
 # kg_index = load_index_from_storage(storage_context=storage_context)
