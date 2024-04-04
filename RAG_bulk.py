@@ -2,11 +2,13 @@
 
 import os
 import sys
+import time
 import logging
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 import google.generativeai
+from neo4j import exceptions
 from multiprocessing import Pool
 from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
@@ -19,16 +21,20 @@ from llama_index.core.indices.knowledge_graph.base import (
     StorageContext,
 )
 
-# from llama_index.core.query_engine import KnowledgeGraphQueryEngine
 from llama_index.core import load_index_from_storage
-
+from utils import dataset
 # from anti_woke import *
+
 
 logging.basicConfig(
     stream=sys.stdout, level=logging.INFO
 )  # logging.DEBUG for more verbose output
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
+start_from = int(sys.argv[1])
+go_until = int(sys.argv[2])
+print("start ", start_from, " till ", go_until)
+# sys.exit(0)
 
 # define LLM
 # NOTE: at the time of demo, text-davinci-002 did not have rate-limit s
@@ -39,7 +45,7 @@ Settings.llm = llm
 Settings.embed_model = embedding_llm
 Settings.chunk_size = 2048
 
-space_name = "llamaindex"
+space_name = "doctor_rag_continuous"
 edge_types, rel_prop_names = ["relationship"], [
     "relationship"
 ]  # default, could be omit if create from an empty kg
@@ -50,214 +56,89 @@ database = "neo4j"
 # username = "neo4j"
 # chunk_size = Settings.chunk_size
 # password = "news-rocks-subsystem"
-# url = "bolt://44.211.161.164:7687"
+# url = "bolt://100.27.45.13:7687"
 # # bolt+s://7f12b126f773205cdfea28a0ad768638.neo4jsandbox.com:7687
 
 # # 2048 index
 # username = "neo4j"
-# password = "officials-shapes-masks"
-# url = "bolt://3.235.103.212:7687"
-# # bolt+s://a59005a074b6b1e95f65b0b90df3e003.neo4jsandbox.com:7687
+# password = "bureau-auto-adherences"
+# url = "bolt://100.27.45.13:7687"
+# # bolt+s://68db8edf1c2e12a3cc7f7860fe28d770.neo4jsandbox.com:7687
 
-# 2048 contiguous
+# # 2048 incremental
+# username = "neo4j"
+# password = "nail-interface-necks"
+# url = "bolt://3.238.101.93:7687"
+# db_id = "aa71f7f54748577d4ac173a4462cd074"
+# # # bolt+s://aa71f7f54748577d4ac173a4462cd074.bolt.neo4jsandbox.com:443
+
+# 2048 multithreaded index
 username = "neo4j"
-password = "news-rocks-subsystem"
-url = "bolt://44.211.161.164:7687"
-# bolt+s://7f12b126f773205cdfea28a0ad768638.neo4jsandbox.com:7687
-
-indices = [
-    124,
-    163,
-    200,
-    223,
-    721,
-    915,
-    934,
-    952,
-    953,
-    1068,
-    1069,
-    1071,
-    1072,
-    1073,
-    1075,
-    1076,
-    1077,
-    1078,
-    1217,
-    1233,
-    1261,
-    1267,
-    1716,
-    2319,
-]
-
-df = pd.read_csv("sentences_syn.csv")
-# df.reset_index(drop=True)
-df["size"] = df["text"].str.len()
-# print(df.dtypes)
-# df["fname"] = df["fname"].str
-# print(df.fname.unique())
-# df = df[ df["fname"].str == 'e63c3c2f506e63c49a002a5e3ead8934' ]
-
-documents = []
-nodes = []
-files = df.groupby("fname")
-
-for f_name, f_content in files:
-    chunk = ""
-    start = None  # track the start from the group index
-    for i, row in f_content.iterrows():
-        content = row.text.lower()
-        size = len(content)
-        # print()
-        if size > Settings.chunk_size:
-            # Handle single-row chunks directly
-            metadata = {
-                "source": f_name,
-                "block_size": Settings.chunk_size,
-                "size": size,
-                "start": i + 1,
-                "end": i + 1,
-            }
-            doc = Document(text=content.strip(), metadata=metadata)
-            documents.append(doc)
-
-            node = Node(text=content.strip(), metadata=metadata)
-            nodes.append(node)
-            start = i  # Update start for potential subsequent multi-row chunks
-            continue
-
-        elif len(chunk) + size > Settings.chunk_size:
-            # Handle multi-row chunk creation
-            metadata = {
-                "source": f_name,
-                "block_size": Settings.chunk_size,
-                "size": len(chunk),
-                "start": start + 1,
-                "end": i,
-            }
-            doc = Document(text=chunk.strip(), metadata=metadata)
-            documents.append(doc)
-
-            node = Node(text=chunk.strip(), metadata=metadata)
-            nodes.append(node)
-            chunk = ""
-            start = i  # Update start for the next chunk
-            continue
-
-        else:
-            # Accumulate text for multi-row chunks
-            chunk += " " + content
-            start = start or i
-            continue
-
-# print(len(lens), max(lens), min(lens), sum(lens)/len(lens))
-
-# for metadata, text in texts:
-#     doc = Document(text=text, metadata=metadata)
-#     documents.append(doc)
-
+password = "barriers-brush-stocking"
+url = "bolt://44.200.14.6:7687"
+# bolt+s://c8ac89364ecd0581662c26ca8fcd869e.neo4jsandbox.com:7687
 
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
-storage_context = StorageContext.from_defaults(graph_store=graph_store)
+storage_context = StorageContext.from_defaults(graph_store=graph_store)#, persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
 
-# for i, doc in enumerate(documents):
-#     if i == 221:
-#         print(doc.text)
+df = pd.read_csv("sentences_syn.csv")
+# df.reset_index(drop=True)
+df["size"] = df["text"].str.len()
+nodes = dataset(df, Settings.chunk_size)
 
-# documents = documents[:220+76+100]
-
-kg_index = KnowledgeGraphIndex(
+                                               
+kg_index_f = KnowledgeGraphIndex.from_documents(
     [],
     storage_context=storage_context,
-    max_triplets_per_chunk=120,
+    max_triplets_per_chunk=280,
     space_name=space_name,
     edge_types=edge_types,
     rel_prop_names=rel_prop_names,
     tags=tags,
+    # show_progress=True,
     include_embeddings=True,
+    verbose=True
 )
 
+kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
 
-# for doc in tqdm(documents, total=len(documents)):
-# for i in tqdm(indices, total=len(indices)):
-#     doc = documents[i]
-# print("L: ", len(nodes))
-# nodes = nodes[12:13]
-# print("L: ", len(nodes))
-# for node in tqdm(nodes, total=len(nodes)):
-# print("F: ", node.metadata)
-# print(node.text)
-# print()
-# for doc in documents:
-#     # try:
+                                                                                              
 def extract_triplets(node):
-    triplets = kg_index._extract_triplets(node.text)
+    triplets = kg_index_f._llm_extract_triplets(node.text)
     return list(set(triplets)), [node]
 
-
 def process_node(node):
-    print("process_node: ", node)
-
+    # print("process_node: ", node)
+    triplets = []
     try:
         triplets, node = extract_triplets(node)
-        return triplets, node
-    except Exception as e:
+        # return triplets
+    # except Exception as e:
+    except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
+        time.sleep(10)
+        triplets, node = extract_triplets(node)
+        # return triplets                                            
+    except (google.generativeai.types.generation_types.StopCandidateException, google.generativeai.types.generation_types.BlockedPromptException) as e:
 
-        start = node.metadata.get("start")
-        end = node.metadata.get("end")
+        left_node, right_node = node.split()
 
-        mid = start + (end - start) // 2
-
-        left_text = " ".join(df.iloc[start:mid, 2].tolist()).lower().strip()
-        right_text = " ".join(df.iloc[mid:end, 2].tolist()).lower().strip()
-
-        left_metadata = metadata.copy()
-        left_metadata.update(
-            {
-                "block_size": Settings.chunk_size,
-                "size": len(left_text) + 1,
-                "start": start,
-                "end": mid,
-            }
-        )
-
-        right_metadata = metadata.copy()
-        right_metadata.update(
-            {
-                "block_size": Settings.chunk_size,
-                "size": len(right_text) + 1,
-                "start": mid + 1,
-                "end": end,
-            }
-        )
-
-        left_node = Node(text=left_text, metadata=left_metadata)
-        right_node = Node(text=right_text, metadata=right_metadata)
-
-        # print("L: ", left_node.text)
-        # print()
-        # print("R: ", right_node.text)
-        # print()
-        # print()
-
-        if len(left_text) > 0:
-            left_triplets, left_node = process_node(left_node)
+        if len(left_node.text) > 0:
+            left_triplets = process_node(left_node)
         else:
-            left_triplets, left_node = [], []
+            left_triplets, left_node = []
 
-        if len(right_text) > 0:
-            right_triplets, right_node = process_node(right_node)
+        if len(right_node.text) > 0:
+            right_triplets = process_node(right_node)
         else:
-            right_triplets, right_node = [], []
-
-        return (left_triplets + right_triplets,)
-
+            right_triplets = []
+        triplets = (left_triplets + right_triplets)
+    return triplets
+    
 
 def split(node):
+
     start = node.metadata.get("start")
     end = node.metadata.get("end")
 
@@ -266,7 +147,7 @@ def split(node):
     left_text = " ".join(df.iloc[start:mid, 2].tolist()).lower().strip()
     right_text = " ".join(df.iloc[mid:end, 2].tolist()).lower().strip()
 
-    left_metadata = metadata.copy()
+    left_metadata = node.metadata.copy()
     left_metadata.update(
         {
             "block_size": Settings.chunk_size,
@@ -276,7 +157,7 @@ def split(node):
         }
     )
 
-    right_metadata = metadata.copy()
+    right_metadata = node.metadata.copy()
     right_metadata.update(
         {
             "block_size": Settings.chunk_size,
@@ -291,136 +172,78 @@ def split(node):
 
     return [left_node, right_node]
 
-
 setattr(Document, "split", split)
 
 
-indices = [
-    86,
-    86 + 38,
-    # 86 + 38 + 1,
-    86 + 38 + 1 + 147,
-    86 + 38 + 1 + 147 + 67,
-    86 + 38 + 1 + 147 + 67 + 116,
-    86 + 38 + 1 + 147 + 67 + 116 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120,
-    # 86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1,
-    86 + 38 + 1 + 147 + 67 + 116 + 1 + 2 + 145 + 66 + 1 + 9 + 1 + 120 + 1 + 95 + 1 + 1,
-    86
-    + 38
-    + 1
-    + 147
-    + 67
-    + 116
-    + 1
-    + 2
-    + 145
-    + 66
-    + 1
-    + 9
-    + 1
-    + 120
-    + 1
-    + 95
-    + 1
-    + 1
-    + 10,
-    86
-    + 38
-    + 1
-    + 147
-    + 67
-    + 116
-    + 1
-    + 2
-    + 145
-    + 66
-    + 1
-    + 9
-    + 1
-    + 120
-    + 1
-    + 95
-    + 1
-    + 1
-    + 10
-    + 1,
-    86
-    + 38
-    + 1
-    + 147
-    + 67
-    + 116
-    + 1
-    + 2
-    + 145
-    + 66
-    + 1
-    + 9
-    + 1
-    + 120
-    + 1
-    + 95
-    + 1
-    + 1
-    + 10
-    + 1
-    + 117
-    + 1,
+unprocessed = []
+triplets_list = []
+def triplet_extractor(text, metadata):
+    global pbar
+    # doc = Document(text=text, metadata=metadata)
+    # triplets = process_node(doc)
+    # if triplets == []:
+    #     unprocessed.append(metadata)
+    # else:
+    #     tag = f'{metadata["source"]}__{metadata["start"]}__{metadata["end"]}'
+    #     triplets_list.append({"triplets": triplets, "id": tag})
+    try:
+        triplets = kg_index_f._llm_extract_triplets(text)
+        tag = f'{metadata["source"]}__{metadata["start"]}__{metadata["end"]}'
+        triplets_list.append({"triplets": triplets, "id": tag})
+    except google.generativeai.types.generation_types.BlockedPromptException as e:
+        # print(f"FAIL BlockedPromptException for {text}")
+        # print(e)
+        unprocessed.append(metadata)
+        triplets = []
+    except google.generativeai.types.generation_types.StopCandidateException as e:
+        # print(f"FAIL StopCandidateException for {text}")
+        # print(e)
+        unprocessed.append(metadata)
+        triplets = []
+    except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
+        time.sleep(10)
+        # print(e)
+        triplets = triplet_extractor(text, metadata)
+    except Exception as e:
+        # print(f"FAIL Exception for {text}")
+        unprocessed.append(metadata)
+        # print(e)
+        time.sleep(3)
+        triplets = []
+    pbar.update(1)
+    return triplets
+
+nodes = nodes[start_from: go_until]
+with tqdm(total=len(nodes)) as pbar:
+
+    kg_index = KnowledgeGraphIndex.from_documents(
+        nodes,
+        storage_context=storage_context,
+        max_triplets_per_chunk=280,
+        space_name=space_name,
+        edge_types=edge_types,
+        rel_prop_names=rel_prop_names,
+        tags=tags,
+        # show_progress=True,
+        kg_triplet_extract_fn=triplet_extractor,
+        include_embeddings=True,
+        verbose=True
+    )
+
+# kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
+
+pd.DataFrame(unprocessed).to_csv(f"unprocessed_data__{start_from}_{go_until}.csv", index=None)
+
+flat_data = [
+    {'subject': triplet[0], 'relation': triplet[1], 'object': triplet[2], 'id': item['id']}
+    for item in data for triplet in item['triplets']
 ]
 
-replacements = {i: documents[i].split() for i in indices}
-
-sliced_documents = []
-for i, x in enumerate(documents):
-    if i not in replacements:
-        # sliced_documents.append(x)
-        pass
-    else:
-        sliced_documents.extend(replacements[i])
-
-# print(sliced_documents)
-# documents = sliced_documents
-print(len(documents))
-indies = []
-
-# documents = documents[indices[-1] + 1:]
-for i, doc in enumerate(documents):
-
-    # try:
-    #     kg_index = KnowledgeGraphIndex.from_documents(
-    #         [doc],
-    #         storage_context=storage_context,
-    #         max_triplets_per_chunk=80,
-    #         space_name=space_name,
-    #         edge_types=edge_types,
-    #         rel_prop_names=rel_prop_names,
-    #         tags=tags,
-    #         show_progress=True,
-    #         include_embeddings=True,
-    #     )
-    # except google.generativeai.types.generation_types.BlockedPromptException:
-    #     # indies.append(i) [125, 680, 1027, 1028, 1034, 1035]
-    #     pass
-    # except google.generativeai.types.generation_types.StopCandidateException:
-    #     print(e)
-    #     indies.append(i)
-
-    process_node
-
-print(indies)
+# Convert to DataFrame
+pd.DataFrame(flat_data).to_csv(f"triplets_data__{start_from}_{go_until}.csv", index=None)
 
 # # kg_index.persist(persist_path="knowledge_graph.json")
 # kg_index = load_index_from_storage(storage_context=storage_context)
-# # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk__{Settings.chunk_size}')
 
 # query_engine = kg_index.as_query_engine(
 #     include_text=True,

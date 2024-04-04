@@ -22,7 +22,7 @@ from llama_index.core.indices.knowledge_graph.base import (
 )
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import KnowledgeGraphRAGRetriever
-
+from utils import dataset
 
 logging.basicConfig(
     stream=sys.stdout, level=logging.INFO
@@ -39,7 +39,7 @@ Settings.llm = llm
 Settings.embed_model = embedding_llm
 Settings.chunk_size = 2048
 
-space_name = "llamaindex"
+space_name = "doctor_rag"
 edge_types, rel_prop_names = ["relationship"], [
     "relationship"
 ]  # default, could be omit if create from an empty kg
@@ -71,63 +71,8 @@ db_id = "aa71f7f54748577d4ac173a4462cd074"
 df = pd.read_csv("sentences_syn.csv")
 # df.reset_index(drop=True)
 df["size"] = df["text"].str.len()
-# print(df.dtypes)
-# df["fname"] = df["fname"].str
-# print(df.fname.unique())
-# df = df[ df["fname"].str == 'e63c3c2f506e63c49a002a5e3ead8934' ]
 
-documents = []
-nodes = []
-files = df.groupby("fname")
-
-for f_name, f_content in files:
-    chunk = ""
-    start = None  # track the start from the group index
-    for i, row in f_content.iterrows():
-        content = row.text.lower()
-        size = len(content)
-        # print()
-        if size > Settings.chunk_size:
-            # Handle single-row chunks directly
-            metadata = {
-                "source": f_name,
-                "block_size": Settings.chunk_size,
-                "size": size,
-                "start": i + 1,
-                "end": i + 1,
-            }
-            doc = Document(text=content.strip(), metadata=metadata)
-            documents.append(doc)
-
-            node = Node(text=content.strip(), metadata=metadata)
-            nodes.append(node)
-            start = i  # Update start for potential subsequent multi-row chunks
-            continue
-
-        elif len(chunk) + size > Settings.chunk_size:
-            # Handle multi-row chunk creation
-            metadata = {
-                "source": f_name,
-                "block_size": Settings.chunk_size,
-                "size": len(chunk),
-                "start": start + 1,
-                "end": i,
-            }
-            doc = Document(text=chunk.strip(), metadata=metadata)
-            documents.append(doc)
-
-            node = Node(text=chunk.strip(), metadata=metadata)
-            nodes.append(node)
-            chunk = ""
-            start = i  # Update start for the next chunk
-            continue
-
-        else:
-            # Accumulate text for multi-row chunks
-            chunk += " " + content
-            start = start or i
-            continue
-
+nodes = dataset(df, Settings.chunk_size)
 
 def split(node):
     start = node.metadata.get("start")
@@ -138,7 +83,7 @@ def split(node):
     left_text = " ".join(df.iloc[start:mid, 2].tolist()).lower().strip()
     right_text = " ".join(df.iloc[mid:end, 2].tolist()).lower().strip()
 
-    left_metadata = metadata.copy()
+    left_metadata = node.metadata.copy()
     left_metadata.update(
         {
             "block_size": Settings.chunk_size,
@@ -148,7 +93,7 @@ def split(node):
         }
     )
 
-    right_metadata = metadata.copy()
+    right_metadata = node.metadata.copy()
     right_metadata.update(
         {
             "block_size": Settings.chunk_size,
@@ -158,13 +103,13 @@ def split(node):
         }
     )
 
-    left_node = Document(text=left_text, metadata=left_metadata)
-    right_node = Document(text=right_text, metadata=right_metadata)
+    left_node = Node(text=left_text, metadata=left_metadata)
+    right_node = Node(text=right_text, metadata=right_metadata)
 
     return [left_node, right_node]
 
 
-setattr(Document, "split", split)
+setattr(Node, "split", split)
 
 indices = []
 track = []
@@ -242,7 +187,7 @@ kg_index = KnowledgeGraphIndex.from_documents(
     include_embeddings=True,
 )
 
-for node in documents[:5]:
+for node in nodes[:5]:
     triplets = kg_index._extract_triplets(node.text)
     # print(triplets)
     triplets = set(triplets)
