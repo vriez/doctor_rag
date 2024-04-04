@@ -49,7 +49,7 @@ space_name = "doctor_rag_continuous"
 edge_types, rel_prop_names = ["relationship"], ["relationship"] 
 tags = ["entity"]
 database = "neo4j"
-
+MAX_TRIPLETS = 320
 # 512
 # username = "neo4j"
 # chunk_size = Settings.chunk_size
@@ -129,7 +129,7 @@ nodes = dataset(df, Settings.chunk_size)
 kg_index_f = KnowledgeGraphIndex.from_documents(
     [],
     storage_context=storage_context,
-    max_triplets_per_chunk=280,
+    max_triplets_per_chunk=MAX_TRIPLETS,
     space_name=space_name,
     edge_types=edge_types,
     rel_prop_names=rel_prop_names,
@@ -140,7 +140,7 @@ kg_index_f = KnowledgeGraphIndex.from_documents(
 )
 
 # kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
-kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
+kg_index_f.storage_context.persist(persist_dir=storage_path)
                                                                                               
 def extract_triplets(node, metadata):
     triplets = kg_index_f._extract_triplets(node.text, metadata)
@@ -258,7 +258,7 @@ with tqdm(total=len(nodes)) as pbar:
     kg_index = KnowledgeGraphIndex.from_documents(
         nodes,
         storage_context=storage_context,
-        max_triplets_per_chunk=280,
+        max_triplets_per_chunk=MAX_TRIPLETS,
         space_name=space_name,
         edge_types=edge_types,
         rel_prop_names=rel_prop_names,
@@ -271,7 +271,7 @@ with tqdm(total=len(nodes)) as pbar:
 
 # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
 
-kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
+kg_index_f.storage_context.persist(persist_dir=storage_path)
 
 pd.DataFrame(unprocessed).to_csv(f"f_unprocessed_data__{start_from}_{go_until}.csv", index=None)
 
