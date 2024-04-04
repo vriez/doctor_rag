@@ -33,7 +33,7 @@ logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 start_from = int(sys.argv[1])
 go_until = int(sys.argv[2])
-print("start ", start_from, " till ", go_until)
+# print(f"python RAG_bulk.py {start_from*200} {(start_from+1) * 200} &")
 # sys.exit(0)
 
 # define LLM
@@ -72,16 +72,23 @@ database = "neo4j"
 # db_id = "aa71f7f54748577d4ac173a4462cd074"
 # # # bolt+s://aa71f7f54748577d4ac173a4462cd074.bolt.neo4jsandbox.com:443
 
+# # 2048 multithreaded index
+# username = "neo4j"
+# password = "barriers-brush-stocking"
+# url = "bolt://44.200.14.6:7687"
+# # bolt+s://c8ac89364ecd0581662c26ca8fcd869e.neo4jsandbox.com:7687
+
+
 # 2048 multithreaded index
 username = "neo4j"
-password = "barriers-brush-stocking"
-url = "bolt://44.200.14.6:7687"
-# bolt+s://c8ac89364ecd0581662c26ca8fcd869e.neo4jsandbox.com:7687
+password = "machines-electrolytes-troop"
+url = "bolt://3.239.198.148:7687"
+# bolt+s://26d1b177537db8832f0d69488ed8fa41.neo4jsandbox.com:7687
 
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
-storage_context = StorageContext.from_defaults(graph_store=graph_store)#, persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
+storage_context = StorageContext.from_defaults(graph_store=graph_store)#, persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
 
 df = pd.read_csv("sentences_syn.csv")
 # df.reset_index(drop=True)
@@ -102,8 +109,8 @@ kg_index_f = KnowledgeGraphIndex.from_documents(
     verbose=True
 )
 
-kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
-
+# kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
+kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_26d1b177537db8832f0d69488ed8fa41__2048')
                                                                                               
 def extract_triplets(node):
     triplets = kg_index_f._llm_extract_triplets(node.text)
@@ -210,25 +217,25 @@ def triplet_extractor(text, metadata):
         # print(e)
         time.sleep(3)
         triplets = []
-    pbar.update(1)
+    # pbar.update(1)
     return triplets
 
 nodes = nodes[start_from: go_until]
-with tqdm(total=len(nodes)) as pbar:
+# with tqdm(total=len(nodes)) as pbar:
 
-    kg_index = KnowledgeGraphIndex.from_documents(
-        nodes,
-        storage_context=storage_context,
-        max_triplets_per_chunk=280,
-        space_name=space_name,
-        edge_types=edge_types,
-        rel_prop_names=rel_prop_names,
-        tags=tags,
-        # show_progress=True,
-        kg_triplet_extract_fn=triplet_extractor,
-        include_embeddings=True,
-        verbose=True
-    )
+kg_index = KnowledgeGraphIndex.from_documents(
+    nodes,
+    storage_context=storage_context,
+    max_triplets_per_chunk=280,
+    space_name=space_name,
+    edge_types=edge_types,
+    rel_prop_names=rel_prop_names,
+    tags=tags,
+    # show_progress=True,
+    kg_triplet_extract_fn=triplet_extractor,
+    include_embeddings=True,
+    verbose=True
+)
 
 # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
 
@@ -236,7 +243,7 @@ pd.DataFrame(unprocessed).to_csv(f"unprocessed_data__{start_from}_{go_until}.csv
 
 flat_data = [
     {'subject': triplet[0], 'relation': triplet[1], 'object': triplet[2], 'id': item['id']}
-    for item in data for triplet in item['triplets']
+    for item in triplets_list for triplet in item['triplets']
 ]
 
 # Convert to DataFrame
