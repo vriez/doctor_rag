@@ -77,7 +77,7 @@ MAX_TRIPLETS = 320
 # # bolt+s://c8ac89364ecd0581662c26ca8fcd869e.neo4jsandbox.com:7687
 
 
-# # 2048 multithreaded index
+# # 2048 multithreaded
 # username = "neo4j"
 # password = "machines-electrolytes-troop"
 # url = "bolt://3.239.198.148:7687"
