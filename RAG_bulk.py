@@ -22,7 +22,7 @@ from llama_index.core.indices.knowledge_graph.base import (
 )
 
 from llama_index.core import load_index_from_storage
-from utils import dataset
+from utils import dataset, dataset_overlap
 # from anti_woke import *
 
 
@@ -63,12 +63,12 @@ MAX_TRIPLETS = 320
 # url = "bolt://100.27.45.13:7687"
 # # bolt+s://68db8edf1c2e12a3cc7f7860fe28d770.neo4jsandbox.com:7687
 
-# # 2048 incremental
-# username = "neo4j"
-# password = "nail-interface-necks"
-# url = "bolt://3.238.101.93:7687"
-# db_id = "aa71f7f54748577d4ac173a4462cd074"
-# # # bolt+s://aa71f7f54748577d4ac173a4462cd074.bolt.neo4jsandbox.com:443
+# 2048 incremental
+username = "neo4j"
+password = "nail-interface-necks"
+url = "bolt://3.238.101.93:7687"
+db_id = "aa71f7f54748577d4ac173a4462cd074"
+# # bolt+s://aa71f7f54748577d4ac173a4462cd074.bolt.neo4jsandbox.com:443
 
 # # 2048 multithreaded index
 # username = "neo4j"
@@ -84,22 +84,23 @@ MAX_TRIPLETS = 320
 # # bolt+s://26d1b177537db8832f0d69488ed8fa41.neo4jsandbox.com:7687
 
 # 2048 multithreaded index
-username = "neo4j"
-password = "accusation-tube-blueprints"
-url = "bolt://3.91.206.92:7687"
-# bolt+s://bcd95aaad62b7b424b7f0675feac7185.neo4jsandbox.com:7687
+# username = "neo4j"
+# password = "accusation-tube-blueprints"
+# url = "bolt://3.91.206.92:7687"
+# # bolt+s://bcd95aaad62b7b424b7f0675feac7185.neo4jsandbox.com:7687
 
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
-storage_path = './storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048'
+storage_path = f'./storage_graph_{db_id}__2048'
 storage_context = StorageContext.from_defaults(graph_store=graph_store)  #, persist_dir=f'./storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048')
 
 df = pd.read_csv("sentences_syn.csv")
 # df.reset_index(drop=True)
 df["size"] = df["text"].str.len()
-nodes = dataset(df, Settings.chunk_size)
-
+# nodes = dataset(df, Settings.chunk_size)
+nodes = dataset_overlap(df, Settings.chunk_size, 1)
+print("nodes: ", len(nodes))
 # udfs = []
 # for p in Path(".").glob("unprocessed_data*.csv"):
 #     udfs.append(pd.read_csv(p))
@@ -136,26 +137,27 @@ kg_index_f = KnowledgeGraphIndex.from_documents(
     tags=tags,
     # show_progress=True,
     include_embeddings=True,
-    verbose=True
+    verbose=True,
+    timeout=100
 )
 
 # kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
 kg_index_f.storage_context.persist(persist_dir=storage_path)
                                                                                               
-def extract_triplets(node, metadata):
-    triplets = kg_index_f._extract_triplets(node.text, metadata)
+def extract_triplets(node):
+    triplets = kg_index_f._extract_triplets(node.text, node.metadata)
     return list(set(triplets)), [node]
 
 def process_node(node):
     # print("process_node: ", node)
     triplets = []
     try:
-        triplets, node = extract_triplets(node, node.metadata)
+        triplets, node = extract_triplets(node)
         # return triplets
     # except Exception as e:
     except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
         time.sleep(10)
-        triplets, node = extract_triplets(node, node.metadata)
+        triplets, node = extract_triplets(node)
         # return triplets                                            
     except (google.generativeai.types.generation_types.StopCandidateException, google.generativeai.types.generation_types.BlockedPromptException) as e:
 
@@ -252,7 +254,7 @@ def triplet_extractor(text, metadata):
     pbar.update(1)
     return triplets
 
-# nodes = nodes[start_from: go_until]
+# nodes = nodes[830:]
 with tqdm(total=len(nodes)) as pbar:
 
     kg_index = KnowledgeGraphIndex.from_documents(
@@ -271,9 +273,9 @@ with tqdm(total=len(nodes)) as pbar:
 
 # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
 
-kg_index_f.storage_context.persist(persist_dir=storage_path)
+kg_index.storage_context.persist(persist_dir=storage_path)
 
-pd.DataFrame(unprocessed).to_csv(f"f_unprocessed_data__{start_from}_{go_until}.csv", index=None)
+pd.DataFrame(unprocessed).to_csv(f"f_unprocessed_data_{db_id}_1.csv", index=None)
 
 flat_data = [
     {'subject': triplet[0], 'relation': triplet[1], 'object': triplet[2], 'id': item['id']}
@@ -281,7 +283,7 @@ flat_data = [
 ]
 
 # Convert to DataFrame
-pd.DataFrame(flat_data).to_csv(f"f_triplets_data__{start_from}_{go_until}.csv", index=None)
+pd.DataFrame(flat_data).to_csv(f"f_triplets_data_{db_id}.csv", index=None)
 
 # # kg_index.persist(persist_path="knowledge_graph.json")
 # kg_index = load_index_from_storage(storage_context=storage_context)
