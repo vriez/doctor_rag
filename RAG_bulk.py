@@ -23,6 +23,7 @@ from llama_index.core.indices.knowledge_graph.base import (
 
 from llama_index.core import load_index_from_storage
 from utils import dataset, dataset_overlap
+
 # from anti_woke import *
 
 
@@ -46,7 +47,7 @@ Settings.embed_model = embedding_llm
 Settings.chunk_size = 2048
 
 space_name = "doctor_rag_continuous"
-edge_types, rel_prop_names = ["relationship"], ["relationship"] 
+edge_types, rel_prop_names = ["relationship"], ["relationship"]
 tags = ["entity"]
 database = "neo4j"
 MAX_TRIPLETS = 320
@@ -92,8 +93,10 @@ db_id = "aa71f7f54748577d4ac173a4462cd074"
 graph_store = Neo4jGraphStore(
     username=username, password=password, url=url, database=database
 )
-storage_path = f'./storage_graph_{db_id}__2048'
-storage_context = StorageContext.from_defaults(graph_store=graph_store)  #, persist_dir=f'./storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048')
+storage_path = f"./storage_graph_{db_id}__2048"
+storage_context = StorageContext.from_defaults(
+    graph_store=graph_store
+)  # , persist_dir=f'./storage_graph_bcd95aaad62b7b424b7f0675feac7185__2048')
 
 df = pd.read_csv("sentences_syn.csv")
 # df.reset_index(drop=True)
@@ -138,15 +141,17 @@ kg_index_f = KnowledgeGraphIndex.from_documents(
     # show_progress=True,
     include_embeddings=True,
     verbose=True,
-    timeout=100
+    timeout=100,
 )
 
 # kg_index_f.storage_context.persist(persist_dir=f'./storage_graph_c8ac89364ecd0581662c26ca8fcd869e__2048')
 kg_index_f.storage_context.persist(persist_dir=storage_path)
-                                                                                              
+
+
 def extract_triplets(node):
     triplets = kg_index_f._extract_triplets(node.text, node.metadata)
     return list(set(triplets)), [node]
+
 
 def process_node(node):
     # print("process_node: ", node)
@@ -158,8 +163,11 @@ def process_node(node):
     except (exceptions.ServiceUnavailable, exceptions.TransientError) as e:
         time.sleep(10)
         triplets, node = extract_triplets(node)
-        # return triplets                                            
-    except (google.generativeai.types.generation_types.StopCandidateException, google.generativeai.types.generation_types.BlockedPromptException) as e:
+        # return triplets
+    except (
+        google.generativeai.types.generation_types.StopCandidateException,
+        google.generativeai.types.generation_types.BlockedPromptException,
+    ) as e:
 
         left_node, right_node = node.split()
 
@@ -172,9 +180,9 @@ def process_node(node):
             right_triplets = process_node(right_node)
         else:
             right_triplets = []
-        triplets = (left_triplets + right_triplets)
+        triplets = left_triplets + right_triplets
     return triplets
-    
+
 
 def split(node):
 
@@ -211,11 +219,14 @@ def split(node):
 
     return [left_node, right_node]
 
+
 setattr(Document, "split", split)
 
 
 unprocessed = []
 triplets_list = []
+
+
 def triplet_extractor(text, metadata):
     # global pbar
 
@@ -254,6 +265,7 @@ def triplet_extractor(text, metadata):
     pbar.update(1)
     return triplets
 
+
 # nodes = nodes[830:]
 with tqdm(total=len(nodes)) as pbar:
 
@@ -268,7 +280,7 @@ with tqdm(total=len(nodes)) as pbar:
         # show_progress=True,
         kg_triplet_extract_fn=triplet_extractor,
         include_embeddings=True,
-        verbose=True
+        verbose=True,
     )
 
 # kg_index.storage_context.persist(persist_dir=f'./storage_graph_bulk_25__{Settings.chunk_size}')
@@ -278,8 +290,14 @@ kg_index.storage_context.persist(persist_dir=storage_path)
 pd.DataFrame(unprocessed).to_csv(f"f_unprocessed_data_{db_id}_1.csv", index=None)
 
 flat_data = [
-    {'subject': triplet[0], 'relation': triplet[1], 'object': triplet[2], 'id': item['id']}
-    for item in triplets_list for triplet in item['triplets']
+    {
+        "subject": triplet[0],
+        "relation": triplet[1],
+        "object": triplet[2],
+        "id": item["id"],
+    }
+    for item in triplets_list
+    for triplet in item["triplets"]
 ]
 
 # Convert to DataFrame
