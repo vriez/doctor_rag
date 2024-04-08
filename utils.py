@@ -65,9 +65,45 @@ def dataset(df, chunk_size):
 
     return nodes
 
+def dataset_overlaap(df, chunk_size, overlap):
+    nodes = []
+    files = df.groupby("fname")
+
+    for f_name, f_content in files:
+        chunks = []
+        start_index = 0  # Initialize start index for chunks
+
+        while start_index < len(f_content):
+            # Calculate end index for the chunk considering the chunk_size
+            end_index = min(start_index + chunk_size, len(f_content))
+
+            # Extract chunk's content and create metadata
+            chunk_df = f_content.iloc[start_index:end_index]
+            metadata = {
+                "source": f_name,
+                "block_size": chunk_size,
+                "start": chunk_df.index[0],
+                "end": chunk_df.index[-1],
+            }
+            
+            # Combine texts within the chunk
+            text = ' '.join(chunk_df['text'].str.lower())
+
+            # Create a Document object and add to nodes
+            node = Document(text=text.strip(), metadata=metadata)
+            nodes.append(node)
+
+            # Update start_index for the next chunk considering overlap
+            start_index = end_index - overlap
+
+            # Prevent infinite loop at the end of a file by ensuring progress
+            if start_index + overlap >= len(f_content):
+                break
+        break
+    return nodes
 
 def dataset_overlap(df, chunk_size, overlap):
-    overlap += 1
+    # overlap += 1
     nodes = []
     files = df.groupby("fname")
 
@@ -80,114 +116,98 @@ def dataset_overlap(df, chunk_size, overlap):
         doc_end = f_content.index[-1]
         print("File start at: ", f_name, doc_start, doc_end)
         block_start = doc_start
+        block_end = block_start
 
-        group_sum = 0
-        group_id = 0
-        group_ids = []
-        groups = []
-        text = []
-        for id, (i, row) in enumerate(f_content.iterrows()):
-
-            # content = row.text.lower()
-            print(group_sum,  row['size'])
-            if group_sum + row['size'] > chunk_size:
-                
-                group_id += 1
-                group_ids.append(group_id)
-                groups.append(text)
-                print("~M: ", list(map(len, text)), sum(map(len, text)))
-                # print("text: ", len(text), text, len(" ".join(text)))
-                group_sum = 0
-                text = []
-            else:
-                text.append(row["text"])
-                group_sum += row['size']
-                print(" -> ", len(row["text"]), row["size"], group_sum)
-            
-            # Adicionar o identificador do grupo à lista
-
-        # print(groups)
-        print("group_ids: ", group_ids)
-        print("groups: ", len(groups))
-        print()
-        
-
-            # # print(id, i, content)
-            # size = len(content)
-            
-            # # Print the selected rows
-            # # print(selected_rows)
-            # # if size > chunk_size:
-            # #     # Handle single-row chunks directly
-            # #     metadata = {
-            # #         "source": f_name,
-            # #         "block_size": chunk_size,
-            # #         "size": size,
-            # #         "start": i - overlap,
-            # #         "end": i - overlap,
-            # #     }
-            # #     # print(metadata)
-            # #     df_content = df.iloc[i + 1 - overlap : i + 1, :]
-            # #     df_content = df_content[df_content["fname"] == f_name]["text"]
-            # #     # print("!=> ", df_content)
-            # #     text = "\n".join(df_content)
-            # #     node = Document(text=text.strip(), metadata=metadata)
-            # #     nodes.append(node)
-            # #     start = (
-            # #         i + overlap + 1
-            # #     )  # Update start for potential subsequent multi-row chunks
-            # #     continue
-
-            # if len(chunk) + size > chunk_size:
-            #     # Handle multi-row chunk creation
-            #     metadata = {
-            #         "source": f_name,
-            #         "block_size": chunk_size,
-            #         "size": len(chunk),
-            #         "start": start - overlap,
-            #         "end": i - overlap,
-            #     }
-            #     # print(metadata)
-            #     df_content = df.iloc[start - overlap : i + overlap, :]
-            #     df_content = df_content[df_content["fname"] == f_name]["text"]
-            #     # print("==> ", df_content)
-            #     text = "\n".join(df_content)
-            #     node = Document(text=text.strip(), metadata=metadata)
-            #     nodes.append(node)
-            #     chunk = ""
-            #     start = i + overlap + 1  # Update start for the next chunk
-
-            #     # continue
-
-            # # elif id > f_content.shape[0] - overlap:
-            # # else:
-            # #     # Accumulate text for multi-row chunks
-            # #     chunk += " " + content
-
-            # #     metadata = {
-            # #         "source": f_name,
-            # #         "block_size": chunk_size,
-            # #         "size": len(chunk),
-            # #         "start": start - overlap,
-            # #         "end": i - overlap,
-            # #     }
-            # #     # start -= overlap
-            # #     # print("-> ", " ".join(df.iloc[start + 1 - overlap:i, 2]))
-            # #     # continue
-            # #     # print(id, i, f_content.shape[0])
-
-            # #     df_content = df.iloc[start - overlap - 1 : i + overlap, :]
-            # #     df_content = df_content[df_content["fname"] == f_name]["text"]
-            # #     # print("--> ", metadata, df_content)
-            # #     text = "\n".join(df_content)
-
-            # #     node = Document(text=text.strip(), metadata=metadata)
-            # #     nodes.append(node)
-            # #     start = i + overlap + 1
-            # else:
-            #     # Accumulate text for multi-row chunks
-            #     chunk += " " + content
+        block_id = 0
+        # print("index: ", f_content.index)
         # break
+        df_i = iter(enumerate(f_content.iterrows()))
+        i = 0
+        
+        tail = False
+        wrap_up = False
+        print("-----------> ", i)
+        while True:
+            print("K: ", block_end, block_end - 1 == doc_end, chunk == "")
+            if i > len(f_content):
+                print("Whoa")
+                break
+        # for _ in range(doc_start, doc_end+1):
+        # for id, (i, row) in enumerate(f_content.iterrows()):
+            # print("i is: ", i)
+            # try:
+            try:
+                row = f_content.loc[block_end]
+                content = row.text.lower()
+            except:
+                print("M: ", )
+                tail = True
+                # break
+            # print("F: ", i, row)
+            # id, (i, row) = next(df_i)
+            # print("> ", id, i, row)
+            # except KeyError:
+            #     content = ""
+            #     wrap_up = True
+            #     # print(id, i, content)
+            size = len(content)
+            
+
+            if (len(chunk) + size >= chunk_size) ^ tail:
+                # if tail:
+                #     print("~~~")
+
+                # block_end = i
+                # if (id == doc_end):
+                #     print("ends before")
+
+                block_id += 1
+
+                # Handle multi-row chunk creation
+                metadata = {
+                    "source": f_name,
+                    "block_size": chunk_size,
+                    "size": len(chunk),
+                    "start": block_start,
+                    "end": block_end,
+                }
+
+                # print(metadata)
+                
+                df_content = df.iloc[block_start : block_end, :]
+                df_content = df_content[df_content["fname"] == f_name]["text"]
+                
+                # print("==> ", df_content)
+                
+                text = "\n".join(df_content)
+                node = Document(text=text.strip(), metadata=metadata)
+                nodes.append(node)
+                chunk = ""
+                
+                # start = i + overlap + 1  # Update start for the next chunk
+                print(f"Block {block_id} starts at: {block_start} - {block_end} - {doc_end} | {i} ++ {len(text)}", metadata)
+                block_start = block_end - overlap
+                tail = False
+
+            else:
+                # print("len == ", len(chunk))
+                # Accumulate text for multi-row chunks
+                chunk += " " + content
+                # if i == doc_end+1:
+                #     print("== ", block_end, i, doc_end)
+                #     block_end = doc_end
+                # else:
+                block_end += 1
+                i += 1
+            
+            if block_end - 1 == doc_end and chunk == "":
+                print("Ka: ", block_end, doc_end, block_end - 1 == doc_end, chunk == "")
+                break
+        # else:
+        #     print("V: ")
+            
+            
+        break
     return nodes
 
 
