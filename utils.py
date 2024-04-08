@@ -1,5 +1,7 @@
-import pandas as pd
-from llama_index.core.schema import Node, Document
+import google.generativeai
+import time
+from neo4j import exceptions
+from llama_index.core.schema import Document
 
 
 def dataset(df, chunk_size):
@@ -57,7 +59,7 @@ def dataset(df, chunk_size):
                     "end": i,
                 }
                 # continue
-            text = " ".join(df.iloc[start + 1:i, 2])
+            text = " ".join(df.iloc[start + 1 : i, 2])
             node = Document(text=text.strip(), metadata=metadata)
             nodes.append(node)
 
@@ -87,13 +89,15 @@ def dataset_overlap(df, chunk_size, overlap):
                     "end": i - overlap,
                 }
                 # print(metadata)
-                df_content = df.iloc[i + 1 - overlap:i+1, :]
-                df_content = df_content[df_content['fname'] == f_name]["text"]
+                df_content = df.iloc[i + 1 - overlap : i + 1, :]
+                df_content = df_content[df_content["fname"] == f_name]["text"]
                 # print("!=> ", df_content)
-                text = " ".join(df_content)
+                text = "\n".join(df_content)
                 node = Document(text=text.strip(), metadata=metadata)
                 nodes.append(node)
-                start = i + overlap + 1  # Update start for potential subsequent multi-row chunks
+                start = (
+                    i + overlap + 1
+                )  # Update start for potential subsequent multi-row chunks
                 continue
 
             elif len(chunk) + size > chunk_size:
@@ -106,36 +110,36 @@ def dataset_overlap(df, chunk_size, overlap):
                     "end": i - overlap,
                 }
                 # print(metadata)
-                df_content = df.iloc[start - overlap:i+overlap, :]
-                df_content = df_content[df_content['fname'] == f_name]["text"]
+                df_content = df.iloc[start - overlap : i + overlap, :]
+                df_content = df_content[df_content["fname"] == f_name]["text"]
                 # print("==> ", df_content)
-                text = " ".join(df_content)
+                text = "\n".join(df_content)
                 node = Document(text=text.strip(), metadata=metadata)
                 nodes.append(node)
                 chunk = ""
                 start = i + overlap + 1  # Update start for the next chunk
                 continue
-            
+
             elif id > f_content.shape[0] - overlap:
                 # Accumulate text for multi-row chunks
                 chunk += " " + content
-                
+
                 metadata = {
                     "source": f_name,
                     "block_size": chunk_size,
                     "size": len(chunk),
                     "start": start - overlap,
-                    "end": i -overlap,
+                    "end": i - overlap,
                 }
                 # start -= overlap
                 # print("-> ", " ".join(df.iloc[start + 1 - overlap:i, 2]))
                 # continue
                 # print(id, i, f_content.shape[0])
 
-                df_content = df.iloc[start - overlap - 1:i+overlap, :]
-                df_content = df_content[df_content['fname'] == f_name]["text"]
+                df_content = df.iloc[start - overlap - 1 : i + overlap, :]
+                df_content = df_content[df_content["fname"] == f_name]["text"]
                 # print("--> ", metadata, df_content)
-                text = " ".join(df_content)
+                text = "\n".join(df_content)
 
                 node = Document(text=text.strip(), metadata=metadata)
                 nodes.append(node)
@@ -152,10 +156,10 @@ def dataset_overlap(df, chunk_size, overlap):
 def dataset_whole(df):
 
     docs = []
-    files = df.groupby("fname")
+    files = sorted(df.groupby("fname"))
 
     for f_name, f_content in files:
-        f_content = f_content[f_content['fname'] == f_name]["text"]
+        f_content = f_content[f_content["fname"] == f_name]["text"]
         doc_text = " ".join(f_content)
         size = len(doc_text)
         metadata = {
@@ -165,5 +169,7 @@ def dataset_whole(df):
             "end": f_content.index[-1],
         }
         doc = Document(text=doc_text.strip(), metadata=metadata)
+        print(doc_text)
         docs.append(doc)
+        break
     return docs

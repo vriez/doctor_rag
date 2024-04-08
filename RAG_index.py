@@ -74,6 +74,7 @@ df["size"] = df["text"].str.len()
 
 nodes = dataset(df, Settings.chunk_size)
 
+
 def split(node):
     start = node.metadata.get("start")
     end = node.metadata.get("end")

@@ -20,9 +20,7 @@ from llama_index.core.indices.knowledge_graph.base import (
     ServiceContext,
 )
 
-logging.basicConfig(
-    stream=sys.stdout, level=logging.INFO
-)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
