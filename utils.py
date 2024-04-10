@@ -65,6 +65,7 @@ def dataset(df, chunk_size):
 
     return nodes
 
+
 def dataset_overlaap(df, chunk_size, overlap):
     nodes = []
     files = df.groupby("fname")
@@ -85,9 +86,9 @@ def dataset_overlaap(df, chunk_size, overlap):
                 "start": chunk_df.index[0],
                 "end": chunk_df.index[-1],
             }
-            
+
             # Combine texts within the chunk
-            text = ' '.join(chunk_df['text'].str.lower())
+            text = " ".join(chunk_df["text"].str.lower())
 
             # Create a Document object and add to nodes
             node = Document(text=text.strip(), metadata=metadata)
@@ -102,8 +103,8 @@ def dataset_overlaap(df, chunk_size, overlap):
         break
     return nodes
 
+
 def dataset_overlap(df, chunk_size, overlap):
-    # overlap += 1
     nodes = []
     files = df.groupby("fname")
 
@@ -114,52 +115,27 @@ def dataset_overlap(df, chunk_size, overlap):
 
         doc_start = f_content.index[0]
         doc_end = f_content.index[-1]
-        print("File start at: ", f_name, doc_start, doc_end)
+        # print("File start at: ", f_name, doc_start, doc_end)
         block_start = doc_start
         block_end = block_start
-
         block_id = 0
-        # print("index: ", f_content.index)
         # break
-        df_i = iter(enumerate(f_content.iterrows()))
+        # df_i = iter(enumerate(f_content.iterrows()))
         i = 0
-        
+
         tail = False
-        wrap_up = False
-        print("-----------> ", i)
         while True:
-            print("K: ", block_end, block_end - 1 == doc_end, chunk == "")
             if i > len(f_content):
-                print("Whoa")
                 break
-        # for _ in range(doc_start, doc_end+1):
-        # for id, (i, row) in enumerate(f_content.iterrows()):
-            # print("i is: ", i)
-            # try:
             try:
                 row = f_content.loc[block_end]
                 content = row.text.lower()
             except:
-                print("M: ", )
                 tail = True
-                # break
-            # print("F: ", i, row)
-            # id, (i, row) = next(df_i)
-            # print("> ", id, i, row)
-            # except KeyError:
-            #     content = ""
-            #     wrap_up = True
-            #     # print(id, i, content)
+
             size = len(content)
-            
 
             if (len(chunk) + size >= chunk_size) ^ tail:
-                # if tail:
-                #     print("~~~")
-
-                # block_end = i
-                # if (id == doc_end):
-                #     print("ends before")
 
                 block_id += 1
 
@@ -172,42 +148,28 @@ def dataset_overlap(df, chunk_size, overlap):
                     "end": block_end,
                 }
 
-                # print(metadata)
-                
-                df_content = df.iloc[block_start : block_end, :]
+                df_content = df.iloc[block_start:block_end, :]
                 df_content = df_content[df_content["fname"] == f_name]["text"]
-                
-                # print("==> ", df_content)
-                
+
                 text = "\n".join(df_content)
                 node = Document(text=text.strip(), metadata=metadata)
                 nodes.append(node)
                 chunk = ""
-                
-                # start = i + overlap + 1  # Update start for the next chunk
-                print(f"Block {block_id} starts at: {block_start} - {block_end} - {doc_end} | {i} ++ {len(text)}", metadata)
+
+                # print(f"Block {block_id} starts at: {block_start} - {block_end} - {doc_end} | {i} ++ {len(text)}", metadata)
                 block_start = block_end - overlap
                 tail = False
 
             else:
-                # print("len == ", len(chunk))
-                # Accumulate text for multi-row chunks
                 chunk += " " + content
-                # if i == doc_end+1:
-                #     print("== ", block_end, i, doc_end)
-                #     block_end = doc_end
-                # else:
                 block_end += 1
                 i += 1
-            
+
             if block_end - 1 == doc_end and chunk == "":
-                print("Ka: ", block_end, doc_end, block_end - 1 == doc_end, chunk == "")
+                # print("Ka: ", block_end, doc_end, block_end - 1 == doc_end, chunk == "")
                 break
-        # else:
-        #     print("V: ")
-            
-            
-        break
+
+        # break
     return nodes
 
 
