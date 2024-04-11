@@ -149,7 +149,7 @@ kg_index_f.storage_context.persist(persist_dir=storage_path)
 
 
 def extract_triplets(node):
-    triplets = kg_index_f._extract_triplets(node.text, node.metadata)
+    triplets = kg_index._extract_triplets(node.text, node.metadata)
     return list(set(triplets)), [node]
 
 
