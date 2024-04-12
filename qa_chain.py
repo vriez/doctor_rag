@@ -4,6 +4,7 @@ from langchain_community.graphs import Neo4jGraph
 from langchain.chains import GraphCypherQAChain
 from langchain_community.chat_models import ChatOllama
 from langchain_openai import ChatOpenAI
+
 # from langchain_google_vertexai import ChatVertexAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -86,7 +87,7 @@ for db, conn in auth_map.items():
             "db": db,
             "question": question,
             "answer": answer,
-            "time": time.time() - tic
+            "time": time.time() - tic,
         }
         data.append(d)
         # except Exception as e:
