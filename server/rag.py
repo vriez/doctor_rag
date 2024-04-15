@@ -41,6 +41,7 @@ neo4j_username = "neo4j"
 neo4j_password = "password"
 graph = Neo4jGraph(url=neo4j_url, username=neo4j_username, password=neo4j_password)
 
+
 class ChatPDF:
     vector_store = None
     retriever = None
@@ -48,7 +49,9 @@ class ChatPDF:
 
     def __init__(self):
         self.model = ChatOllama(model="mistral")
-        self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=100)
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1024, chunk_overlap=100
+        )
         self.prompt = PromptTemplate.from_template(
             """
             <s> [INST] You are an assistant for question-answering tasks. Use the following pieces of retrieved context 
