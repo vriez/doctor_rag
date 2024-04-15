@@ -66,67 +66,30 @@ def dataset(df, chunk_size):
     return nodes
 
 
-def dataset_overlaap(df, chunk_size, overlap):
-    nodes = []
-    files = df.groupby("fname")
-
-    for f_name, f_content in files:
-        chunks = []
-        start_index = 0  # Initialize start index for chunks
-
-        while start_index < len(f_content):
-            # Calculate end index for the chunk considering the chunk_size
-            end_index = min(start_index + chunk_size, len(f_content))
-
-            # Extract chunk's content and create metadata
-            chunk_df = f_content.iloc[start_index:end_index]
-            metadata = {
-                "source": f_name,
-                "block_size": chunk_size,
-                "start": chunk_df.index[0],
-                "end": chunk_df.index[-1],
-            }
-
-            # Combine texts within the chunk
-            text = " ".join(chunk_df["text"].str.lower())
-
-            # Create a Document object and add to nodes
-            node = Document(text=text.strip(), metadata=metadata)
-            nodes.append(node)
-
-            # Update start_index for the next chunk considering overlap
-            start_index = end_index - overlap
-
-            # Prevent infinite loop at the end of a file by ensuring progress
-            if start_index + overlap >= len(f_content):
-                break
-        break
-    return nodes
-
-
 def dataset_overlap(df, chunk_size, overlap):
+
     nodes = []
     files = df.groupby("fname")
+    df_size = df.shape[0]
+    counter = 0
 
     for f_name, f_content in files:
         chunk = ""
         start = None  # track the start from the group index
-        # print(f_name, f_content.shape, f_content.index)
 
         doc_start = f_content.index[0]
         doc_end = f_content.index[-1]
-        # print("File start at: ", f_name, doc_start, doc_end)
         block_start = doc_start
         block_end = block_start
         block_id = 0
-        # break
-        # df_i = iter(enumerate(f_content.iterrows()))
         i = 0
 
         tail = False
-        while True:
+        while block_end < df_size:
+            print("i: ", i, block_end, df_size, len(f_content))
             if i > len(f_content):
                 break
+
             try:
                 row = f_content.loc[block_end]
                 content = row.text.lower()
@@ -135,8 +98,8 @@ def dataset_overlap(df, chunk_size, overlap):
 
             size = len(content)
 
-            if (len(chunk) + size >= chunk_size) ^ tail:
-
+            if (len(chunk) + size >= chunk_size) or tail:
+                # print("entered if: ", len(nodes), block_start, block_end)
                 block_id += 1
 
                 # Handle multi-row chunk creation
@@ -156,20 +119,80 @@ def dataset_overlap(df, chunk_size, overlap):
                 nodes.append(node)
                 chunk = ""
 
-                # print(f"Block {block_id} starts at: {block_start} - {block_end} - {doc_end} | {i} ++ {len(text)}", metadata)
                 block_start = block_end - overlap
                 tail = False
 
             else:
+                print("entered else: ")
                 chunk += " " + content
                 block_end += 1
                 i += 1
 
             if block_end - 1 == doc_end and chunk == "":
-                # print("Ka: ", block_end, doc_end, block_end - 1 == doc_end, chunk == "")
+                print("entered block if: ")
                 break
 
-        # break
+    return nodes
+
+
+def dataset_overlap(df, chunk_size, overlap):
+    nodes = []
+    files = df.groupby("fname")  # Assuming 'fname' is the filename column
+
+    for f_name, f_content in files:
+        chunk = ""
+        block_start = f_content.index[0]
+        block_end = block_start
+        block_id = 0
+
+        while block_end <= f_content.index[-1]:
+            if block_end in f_content.index:
+                row = f_content.loc[block_end]
+                content = row.text.lower()
+                new_chunk_size = len(chunk) + len(content)
+
+                if new_chunk_size >= chunk_size:
+                    # Create metadata for the current chunk
+                    metadata = {
+                        "source": f_name,
+                        "block_size": chunk_size,
+                        "size": len(chunk),
+                        "start": block_start,
+                        "end": block_end,
+                    }
+
+                    # Collect the text for the current chunk
+                    df_content = df.loc[block_start:block_end]
+                    df_content = df_content[df_content["fname"] == f_name]["text"]
+                    text = "\n".join(df_content)
+                    nodes.append(Document(text=text.strip(), metadata=metadata))
+
+                    # Update the start for the next chunk, considering the overlap
+                    block_start = max(block_start, block_end - overlap)
+                    chunk = ""
+
+                # Add current content to chunk
+                chunk += " " + content if chunk else content
+
+            # Move to the next row
+            block_end += 1
+
+            # Special handling for the last chunk in the group
+            if block_end > f_content.index[-1] and chunk:
+                metadata = {
+                    "source": f_name,
+                    "block_size": chunk_size,
+                    "size": len(chunk),
+                    "start": block_start,
+                    "end": f_content.index[-1],
+                }
+                df_content = df.loc[block_start : f_content.index[-1]]
+                df_content = df_content[df_content["fname"] == f_name]["text"]
+                text = "\n".join(df_content)
+                # nodes.append({"text": text.strip(), "metadata": metadata})
+                nodes.append(Document(text=text.strip(), metadata=metadata))
+                break
+
     return nodes
 
 
@@ -189,7 +212,7 @@ def dataset_whole(df):
             "end": f_content.index[-1],
         }
         doc = Document(text=doc_text.strip(), metadata=metadata)
-        print(doc_text)
+        # print(doc_text)
         docs.append(doc)
-        break
+        # break
     return docs

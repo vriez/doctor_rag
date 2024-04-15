@@ -44,57 +44,82 @@ GLOBAL = True
 # tags = ["entity"]
 
 database = "neo4j"
+username = "neo4j"
 
 # 2048 incremental
-username = "neo4j"
-password = "nail-interface-necks"
-url = "bolt://3.238.101.93:7687"
-db_id = "aa71f7f54748577d4ac173a4462cd074"
+# password = "nail-interface-necks"
+# url = "bolt://3.238.101.93:7687"
+# db_id = "aa71f7f54748577d4ac173a4462cd074"
 
-username = "neo4j"
-password = "machines-electrolytes-troop"
-url = "bolt://3.239.198.148:7687"
-db_id = "26d1b177537db8832f0d69488ed8fa41"
+# username = "neo4j"
+# password = "machines-electrolytes-troop"
+# url = "bolt://3.239.198.148:7687"
+# db_id = "26d1b177537db8832f0d69488ed8fa41"
 
-username = "neo4j"
-password = "bureau-auto-adherences"
-url = "bolt://100.27.45.13:7687"
-db_id = "68db8edf1c2e12a3cc7f7860fe28d770"
+# username = "neo4j"
+# password = "bureau-auto-adherences"
+# url = "bolt://100.27.45.13:7687"
+# db_id = "68db8edf1c2e12a3cc7f7860fe28d770"
 
-username = "neo4j"
-password = "accusation-tube-blueprints"
-url = "bolt://3.91.206.92:7687"
-db_id = "bcd95aaad62b7b424b7f0675feac7185"
+# username = "neo4j"
+# password = "accusation-tube-blueprints"
+# url = "bolt://3.91.206.92:7687"
+# db_id = "bcd95aaad62b7b424b7f0675feac7185"
 
+
+# auth_map = {
+#     "aa71f7f54748577d4ac173a4462cd074": {
+#         "username": "neo4j",
+#         "password": "nail-interface-necks",
+#         "url": "bolt://3.238.101.93:7687",
+#     },
+#     "26d1b177537db8832f0d69488ed8fa41": {
+#         "username": "neo4j",
+#         "password": "machines-electrolytes-troop",
+#         "url": "bolt://3.239.198.148:7687",
+#     },
+#     "68db8edf1c2e12a3cc7f7860fe28d770": {
+#         "username": "neo4j",
+#         "password": "bureau-auto-adherences",
+#         "url": "bolt://100.27.45.13:7687",
+#     },
+#     "bcd95aaad62b7b424b7f0675feac7185": {
+#         "username": "neo4j",
+#         "password": "accusation-tube-blueprints",
+#         "url": "bolt://3.91.206.92:7687",
+#     },
+# }
 
 auth_map = {
-    "aa71f7f54748577d4ac173a4462cd074": {
+    "d29e690203979119220cf60f40490e26": {
         "username": "neo4j",
-        "password": "nail-interface-necks",
-        "url": "bolt://3.238.101.93:7687",
+        "password": "samples-rush-capability",
+        "url": "bolt://34.234.207.173:7687",
     },
-    "26d1b177537db8832f0d69488ed8fa41": {
+    "7effdf391d1301b4dff0fdd97838e307": {
         "username": "neo4j",
-        "password": "machines-electrolytes-troop",
-        "url": "bolt://3.239.198.148:7687",
+        "password": "thresholds-checker-science",
+        "url": "bolt://35.173.122.197:7687",
     },
-    "68db8edf1c2e12a3cc7f7860fe28d770": {
+    "69687aead0421f367f69aac6f1249cb2": {
         "username": "neo4j",
-        "password": "bureau-auto-adherences",
-        "url": "bolt://100.27.45.13:7687",
+        "password": "irons-hiss-preventions",
+        "url": "bolt://54.227.0.198:7687",
     },
-    "bcd95aaad62b7b424b7f0675feac7185": {
+    "8d02074acea413208355e0c16b66dc4e": {
         "username": "neo4j",
-        "password": "accusation-tube-blueprints",
-        "url": "bolt://3.91.206.92:7687",
+        "password": "stump-rain-ladders",
+        "url": "bolt://3.216.133.253:7687",
     },
 }
+
 
 for database, (creds) in auth_map.items():
 
     username, password, url = creds.values()
     print(database, username, password, url)
     storage_path = f"./storage_graph_{database}__2048"
+    storage_path = f"./storage_graph_{database}_overlap_286__2048"
 
     graph_store = Neo4jGraphStore(
         username=username, password=password, url=url, database="neo4j", timeout=60
@@ -104,77 +129,81 @@ for database, (creds) in auth_map.items():
         persist_dir=storage_path,
     )
     auth_map[database]["storage"] = storage_context
-    # try:
-    # index = load_index_from_storage(storage_context=storage_context)
-    # try:
     index = load_indices_from_storage(storage_context=storage_context)[0]
-    # except:
-    #     index = load_indices_from_storage(storage_context=storage_context)[0]
 
-    # except Exception as e:
-    #     print(e)
-    #     continue
     auth_map[database]["index"] = index
-
     auth_map[database]["strategy"] = {}
-    # auth_map[database]["strategy"]["vector_based"] = index.as_query_engine(
-    #     explore_global_knowledge=GLOBAL,
-    #     verbose=VERBOSE,
-    #     include_text=INCLUDE_TEXT,
-    # )
 
-    auth_map[database]["strategy"]["keyword-based"] = index.as_query_engine(
-        include_text=INCLUDE_TEXT,
-        retriever_mode="keyword",
-        response_mode="tree_summarize",
-        # explore_global_knowledge=GLOBAL,
-        verbose=VERBOSE,
-    )
+    parameters = [
+        (True, True, True),
+        (False, True, False),
+        (True, True, False),
+        (False, False, False),
+    ]
 
-    auth_map[database]["strategy"]["hybrid"] = index.as_query_engine(
-        include_text=INCLUDE_TEXT,
-        response_mode="tree_summarize",
-        embedding_mode="hybrid",
-        similarity_top_k=3,
-        # explore_global_knowledge=GLOBAL,
-        verbose=VERBOSE,
-    )
+    for i, param in enumerate(parameters):
 
-    graph_rag_retriever = KnowledgeGraphRAGRetriever(
-        storage_context=storage_context,
-        synonym_expand_policy="union",
-        max_synonyms=7,
-        retriever_mode="semantic",
-        with_nl2graphquery=True,
-        verbose=VERBOSE,
-        include_text=INCLUDE_TEXT,
-    )
+        auth_map[database]["strategy"][f"verbo_based__{i}"] = index.as_query_engine()
 
-    auth_map[database]["strategy"]["rag"] = RetrieverQueryEngine.from_args(
-        graph_rag_retriever
-    )
+        auth_map[database]["strategy"][f"keyword_based__{i}"] = index.as_query_engine(
+            retriever_mode="keyword",
+            response_mode="tree_summarize",
+            verbose=VERBOSE,
+            include_text=INCLUDE_TEXT,
+            explore_global_knowledge=GLOBAL,
+        )
 
-    kg_retriever = index.as_retriever(include_text=INCLUDE_TEXT, verbose=VERBOSE)
-    auth_map[database]["strategy"]["kg"] = RetrieverQueryEngine.from_args(kg_retriever)
+        auth_map[database]["strategy"][f"hybrid__{i}"] = index.as_query_engine(
+            include_text=True,
+            response_mode="tree_summarize",
+            embedding_mode="hybrid",
+            similarity_top_k=3,
+            verbose=VERBOSE,
+            explore_global_knowledge=GLOBAL,
+        )
+
+        graph_rag_retriever = KnowledgeGraphRAGRetriever(
+            storage_context=storage_context,
+            synonym_expand_policy="union",
+            max_synonyms=5,
+            retriever_mode="semantic",
+            verbose=VERBOSE,
+            include_text=INCLUDE_TEXT,
+            explore_global_knowledge=GLOBAL,
+        )
+
+        auth_map[database]["strategy"][f"rag__{i}"] = RetrieverQueryEngine.from_args(
+            graph_rag_retriever
+        )
+
+        auth_map[database]["strategy"][f"kg__{i}"] = KnowledgeGraphQueryEngine(
+            storage_context=storage_context,
+            llm=llm,
+            refresh_schema=True,
+            verbose=VERBOSE,
+            include_text=INCLUDE_TEXT,
+            explore_global_knowledge=GLOBAL,
+        )
 
 questions = [
-    # "Tell me about the relationship between Vitamind D and Covid?",
-    # "Tell me about the relationship between Vitamind D and Covid?",
-    # "O que é deficiência de vitamina D?",
-    # "o que é insuficiencia de vitamina D?",
+    "Tell me about the relationship between Vitamind D and Covid?",
+    "Qual é a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar?",
+    "Descreva a relação direta ou indireta entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar trazendo referências bibliográficas conhecidas que suportem a resposta.",
+    "O que é deficiência de vitamina D?",
+    "O que é vitamina D e como ela pode interferir na recuperação da COVID-19?",
+    "Quem é Silvio Santos?",
     "what is vitamin d insufficiency?",
+    "what is the ideal vitami D serum concentration for a human being?",
     "what is vitamin d deficiency?",
-    # "o que é insuficiencia de vitamina D?",
-    # "O que é vitamina D e como ela pode interferir na recuperação da COVID-19?",
-    # "Qual é a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar?",
-    # "Trace a relação direta ou indireta entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar trazendo referências bibliográficas conhecidas que suportem a resposta.",
-    # "Quem é Silvio Santos?",
-    "What is the relationship between the COVID-19 infection, Vitamin D insufficiency and deficiency?"
+    "What is the relationship between the COVID-19 infection, Vitamin D insufficiency and deficiency?",
     "What is the relationship between the severity, recovery, and COVID-19 infection, Vitamin D insufficiency and deficiency, and the use of sunscreen?",
     "Trace the direct or indirect relationship between the severity, recovery, and COVID-19 infection, Vitamin D insufficiency and deficiency, and the use of sunscreen, bringing known bibliographic references that support the answer.",
     "Who is Silvio Santos?",
+    "¿Qué es la insuficiencia de vitamina D?",
+    "¿Cuál es la concentración ideal de vitamina D en suero para un ser humano?",
+    "¿Qué es la deficiencia de vitamina D?",
+    "¿Cuál es la relación entre la infección por COVID-19, la insuficiencia y la deficiencia de vitamina D?",
 ]
-
 
 answers_map = []
 t1 = time.time()
@@ -205,7 +234,7 @@ for db, exp in auth_map.items():
             except Exception as e:
                 print(db, stg_name, e)
                 # continue
-            time.sleep(1)
+                time.sleep(1)
             # print()
             # print()
             # print(answers_map)
@@ -213,6 +242,6 @@ for db, exp in auth_map.items():
 print("elapsed: ", time.time() - t1)
 
 pd.DataFrame(answers_map).to_csv(
-    f"QA_global_{GLOBAL}_verbose_{VERBOSE}_gemini_include_text_{INCLUDE_TEXT}_0_total_en.csv",
+    f"QA_global_all_total_en.csv",
     index=None,
 )
