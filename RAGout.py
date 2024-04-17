@@ -295,7 +295,7 @@ def triplet_extractor(text, metadata):
     return triplets
 
 
-# docs = docs[1728:1730]
+# docs = docs[2947:2950]
 with tqdm(total=len(docs)) as pbar:
 
     kg_index = KnowledgeGraphIndex.from_documents(
@@ -435,7 +435,7 @@ for param in parameters:
                 # print(DB_ID, stg_name)
 
 pd.DataFrame(answers_map).to_csv(
-    f"v_qa_global_{GLOBAL}_verbose_{VERBOSE}_{DB_ID}_include_text_{INCLUDE_TEXT}_{CHUNK_SIZE}_{MAX_TRIPLETS}_overlap_total_en.csv",
+    f"v_qa_{GLOBAL}_verbose_{VERBOSE}_{DB_ID}_include_text_{INCLUDE_TEXT}_{CHUNK_SIZE}_{MAX_TRIPLETS}_overlap_total_en.csv",
     index=None,
 )
 print("elapsed: ", time.time() - t1)
