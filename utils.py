@@ -1,8 +1,26 @@
-import google.generativeai
 import time
+import hashlib
+import google.generativeai
 from neo4j import exceptions
 from llama_index.core.schema import Document
 
+def hash_string(string):
+    """Hashes a string using a cryptographic hash function (SHA256).
+
+    Args:
+        string: The string to hash.
+
+    Returns:
+        A string representation of the hash value.
+    """
+    # Encode the string as bytes (utf-8 encoding)
+    string_encoded = string.encode('utf-8')
+    # Create a SHA256 hash object
+    h = hashlib.sha256()
+    # Update the hash object with the string bytes
+    h.update(string_encoded)
+    # Return the hex digest of the hash
+    return h.hexdigest()
 
 def dataset(df, chunk_size):
 
@@ -137,6 +155,7 @@ def dataset_overlap(df, chunk_size, overlap):
 
 def dataset_overlap(df, chunk_size, overlap):
     nodes = []
+    hashes = []
     files = df.groupby("fname")  # Assuming 'fname' is the filename column
 
     for f_name, f_content in files:
@@ -165,7 +184,14 @@ def dataset_overlap(df, chunk_size, overlap):
                     df_content = df.loc[block_start:block_end]
                     df_content = df_content[df_content["fname"] == f_name]["text"]
                     text = "\n".join(df_content)
-                    nodes.append(Document(text=text.strip(), metadata=metadata))
+                    
+                    hashed_value = hash_string(text)
+                    if hashed_value in hashes:
+                        print("duplicated at 1: ", new_chunk_size, chunk_size)
+                        # break
+                    else:
+                        hashes.append(hashed_value)
+                        nodes.append(Document(text=text.strip(), metadata=metadata))
 
                     # Update the start for the next chunk, considering the overlap
                     block_start = max(block_start, block_end - overlap)
@@ -189,8 +215,14 @@ def dataset_overlap(df, chunk_size, overlap):
                 df_content = df.loc[block_start : f_content.index[-1]]
                 df_content = df_content[df_content["fname"] == f_name]["text"]
                 text = "\n".join(df_content)
-                # nodes.append({"text": text.strip(), "metadata": metadata})
-                nodes.append(Document(text=text.strip(), metadata=metadata))
+                hashed_value = hash_string(text)
+                if hashed_value in hashes:
+                    print("duplicated at 2: ", new_chunk_size, chunk_size)
+                    # break
+                else:
+                    hashes.append(hashed_value)
+                    # nodes.append({"text": text.strip(), "metadata": metadata})
+                    nodes.append(Document(text=text.strip(), metadata=metadata))
                 break
 
     return nodes
