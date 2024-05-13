@@ -7,6 +7,7 @@ import json
 import time
 import random
 import logging
+import argparse
 import pandas as pd
 from utils import (
     dataset_whole,
@@ -41,7 +42,6 @@ from langchain.chains import GraphCypherQAChain
 from langchain_community.graphs import Neo4jGraph
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-
 logging.basicConfig(
     stream=sys.stdout, level=logging.INFO
 )  # logging.DEBUG for more verbose output
@@ -55,58 +55,69 @@ qa_model = ChatGoogleGenerativeAI(model="gemini-1.0-pro", temperature=0)
 
 evaluator = FaithfulnessEvaluator(llm=llm)
 
-database = "neo4j"
-username = "neo4j"
+DATABASE = "neo4j"
+USERNAME = "neo4j"
 
-# # # index_d29e690203979119220cf60f40490e26_overlap_286__2048
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# DB_ID = "d29e690203979119220cf60f40490e26"
-# # # bolt+s://d29e690203979119220cf60f40490e26.neo4jsandbox.com:7687
 
-# # index_7effdf391d1301b4dff0fdd97838e307_overlap_574__4096
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# DB_ID = "7effdf391d1301b4dff0fdd97838e307"
 
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# DB_ID = "69687aead0421f367f69aac6f1249cb2"
+# password = sys.argv[1]
+# url = sys.argv[2]
+# DB_ID = sys.argv[3]
+# overlap = int(sys.argv[4])
+# EXP_TAG = sys.argv[5]
+# CHUNK_SIZE = int(sys.argv[6])
+# MAX_TRIPLETS = int(sys.argv[7])
 
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# DB_ID = "8d02074acea413208355e0c16b66dc4e"
-# overlap = sys.argv[3]
-# EXP_TAG = "block"
-# MAX_TRIPLETS = 286
-# CHUNK_SIZE = 2048
+# Setup the argument parser
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('PASSWORD', type=str, help='Password for the database')
+parser.add_argument('URL', type=str, help='URL of the Neo4j database')
+parser.add_argument('DB_ID', type=str, help='Database ID')
+parser.add_argument('OVERLAP', type=int, help='Overlap value')
+parser.add_argument('EXP_TAG', type=str, help='Experiment tag')
+parser.add_argument('CHUNK_SIZE', type=int, help='Chunk size for processing')
+parser.add_argument('MAX_TRIPLETS', type=int, help='Maximum number of triplets')
 
-password = sys.argv[1]
-url = sys.argv[2]
-DB_ID = sys.argv[3]
-overlap = int(sys.argv[4])
-EXP_TAG = sys.argv[5]
-CHUNK_SIZE = int(sys.argv[6])
-MAX_TRIPLETS = int(sys.argv[7])
+# Parse the arguments
+args = parser.parse_args()
 
+# Use the parsed arguments
 print(
     "~ ",
-    password,
-    url,
-    DB_ID,
-    overlap,
-    EXP_TAG,
-    CHUNK_SIZE,
-    MAX_TRIPLETS,
+    args.PASSWORD,
+    args.URL,
+    args.DB_ID,
+    args.OVERLAP,
+    args.EXP_TAG,
+    args.CHUNK_SIZE,
+    args.MAX_TRIPLETS,
 )
-STORAGE_PATH = f"./v_storage_graph_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
-SPACE_NAME = f"v_index_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
+
+PASSWORD = args.PASSWORD
+URL = args.URL
+DB_ID = args.DB_ID
+OVERLAP = args.OVERLAP
+EXP_TAG = args.EXP_TAG
+CHUNK_SIZE = args.CHUNK_SIZE
+MAX_TRIPLETS = args.MAX_TRIPLETS
+# print(
+#     "~ ",
+#     PASSWORD,
+#     URL,
+#     DB_ID,
+#     OVERLAP,
+#     EXP_TAG,
+#     CHUNK_SIZE,
+#     MAX_TRIPLETS,
+# )
+STORAGE_PATH = f"./storage_graph_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
+SPACE_NAME = f"index_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
 
 TRIPLET_FILE = Path(
-    f"v_triplets_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
+    f"triplets_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
 ).with_suffix(".csv")
 UNPROCESSED_FILE = Path(
-    f"v_unprocessed_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
+    f"unprocessed_{DB_ID}_{EXP_TAG}_{MAX_TRIPLETS}__{CHUNK_SIZE}"
 ).with_suffix(".csv")
 try:
     TRIPLET_FILE.unlink()
@@ -127,7 +138,7 @@ with open(TRIPLET_FILE, "a") as fd:
 with open(UNPROCESSED_FILE, "a") as fd:
     fd.write("[\n")
 
-graph = Neo4jGraph(url=url, username=username, password=password, database="neo4j")
+graph = Neo4jGraph(url=URL, username=USERNAME, password=PASSWORD, database=DATABASE)
 
 print("space_name: ", SPACE_NAME)
 Settings.llm = llm
@@ -138,13 +149,13 @@ edge_types, rel_prop_names = ["relationship"], ["relationship"]
 tags = ["entity"]
 
 graph_store = Neo4jGraphStore(
-    username=username, password=password, url=url, database=database
+    username=USERNAME, password=PASSWORD, url=URL, database=DATABASE
 )
 storage_context = StorageContext.from_defaults(graph_store=graph_store)
 df = pd.read_csv("corpus.csv")
 df["size"] = df["text"].str.len()
 
-docs = dataset_overlap(df, CHUNK_SIZE, overlap)
+docs = dataset_overlap(df, CHUNK_SIZE, OVERLAP)
 # docs = dataset_whole(df)
 print("nodes: ", len(docs))
 
@@ -188,7 +199,6 @@ def process_node(node):
         google.generativeai.types.generation_types.StopCandidateException,
         google.generativeai.types.generation_types.BlockedPromptException,
     ) as e:
-        # print("-->", e)
         nodes = node.split()
         triplets = []
         for n in nodes:
@@ -287,15 +297,12 @@ def triplet_extractor(text, metadata):
             fd.write(",\n")
 
     pbar.update(1)
-
-    # del triplets_list
-    # del unprocessed
     gc.collect()
 
     return triplets
 
 
-# docs = docs[2947:2950]
+docs = docs[2947:2950]
 with tqdm(total=len(docs)) as pbar:
 
     kg_index = KnowledgeGraphIndex.from_documents(
@@ -429,13 +436,13 @@ for param in parameters:
                 }
                 answers_map.append(answer)
                 q_id += 1
-                # print(answer)
             except Exception as e:
-                time.sleep(random.randint(5, 25))
-                # print(DB_ID, stg_name)
+                print("-- ", stg_name, stg)
+                print(e)
+                # time.sleep(random.randint(5, 25))
 
 pd.DataFrame(answers_map).to_csv(
-    f"v_qa_{GLOBAL}_verbose_{VERBOSE}_{DB_ID}_include_text_{INCLUDE_TEXT}_{CHUNK_SIZE}_{MAX_TRIPLETS}_overlap_total_en.csv",
+    f"qa_{GLOBAL}_{VERBOSE}_{DB_ID}__{INCLUDE_TEXT}_{CHUNK_SIZE}_{MAX_TRIPLETS}_{OVERLAP}.csv",
     index=None,
 )
 print("elapsed: ", time.time() - t1)
