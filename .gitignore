@@ -1,0 +1,57 @@
+# Environment & secrets
+.env
+.env.local
+.env.production
+*.secret
+credentials.json
+**/spark_nlp_for_healthcare_*.json
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sfdx/
+.claude/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data files (track via DVC or LFS instead)
+*.csv
+!catalog.csv
+
+# Storage & database
+storage/
+storage_*/
+neo4j_data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large binaries
+*.pdf
+*.pkl
+*.h5
+*.model

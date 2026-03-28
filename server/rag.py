@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import neo4j
@@ -36,9 +37,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 # embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 embeddings = OllamaEmbeddings(model="mistral")
 
-neo4j_url = "bolt://localhost:7687"
-neo4j_username = "neo4j"
-neo4j_password = "password"
+neo4j_url = os.environ.get("NEO4J_URL", "bolt://localhost:7687")
+neo4j_username = os.environ.get("NEO4J_USERNAME", "neo4j")
+neo4j_password = os.environ.get("NEO4J_PASSWORD")
+if not neo4j_password:
+    raise EnvironmentError("NEO4J_PASSWORD environment variable is required.")
 graph = Neo4jGraph(url=neo4j_url, username=neo4j_username, password=neo4j_password)
 
 

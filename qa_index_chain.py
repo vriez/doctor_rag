@@ -1,3 +1,5 @@
+import os
+import json
 import time
 import logging
 import pandas as pd
@@ -28,8 +30,6 @@ from llama_index.core.evaluation import FaithfulnessEvaluator
 
 llm = Gemini(temperature=0, timeout=60)
 embedding_llm = GeminiEmbedding(model="models/embedding-001")
-# llm = OpenAI(temperature=0.0, model="gpt-4")
-# embedding_llm = OpenAIEmbedding(model="text-embedding-3-small")
 evaluator = FaithfulnessEvaluator(llm=llm)
 
 Settings.llm = llm
@@ -39,85 +39,27 @@ Settings.chunk_size = 512
 INCLUDE_TEXT = True
 VERBOSE = False
 GLOBAL = True
-# space_name = "llamaindex"
-# edge_types, rel_prop_names = ["relationship"], ["property"]
-# tags = ["entity"]
 
 database = "neo4j"
 username = "neo4j"
 
-# 2048 incremental
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# db_id = "aa71f7f54748577d4ac173a4462cd074"
-
-# username = "neo4j"
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# db_id = "26d1b177537db8832f0d69488ed8fa41"
-
-# username = "neo4j"
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# db_id = "68db8edf1c2e12a3cc7f7860fe28d770"
-
-# username = "neo4j"
-# password = "REDACTED_NEO4J_PASSWORD"
-# url = "bolt://REDACTED_IP:7687"
-# db_id = "bcd95aaad62b7b424b7f0675feac7185"
-
-
-# auth_map = {
-#     "aa71f7f54748577d4ac173a4462cd074": {
-#         "username": "neo4j",
-#         "password": "REDACTED_NEO4J_PASSWORD",
-#         "url": "bolt://REDACTED_IP:7687",
-#     },
-#     "26d1b177537db8832f0d69488ed8fa41": {
-#         "username": "neo4j",
-#         "password": "REDACTED_NEO4J_PASSWORD",
-#         "url": "bolt://REDACTED_IP:7687",
-#     },
-#     "68db8edf1c2e12a3cc7f7860fe28d770": {
-#         "username": "neo4j",
-#         "password": "REDACTED_NEO4J_PASSWORD",
-#         "url": "bolt://REDACTED_IP:7687",
-#     },
-#     "bcd95aaad62b7b424b7f0675feac7185": {
-#         "username": "neo4j",
-#         "password": "REDACTED_NEO4J_PASSWORD",
-#         "url": "bolt://REDACTED_IP:7687",
-#     },
-# }
-
-auth_map = {
-    "d29e690203979119220cf60f40490e26": {
-        "username": "neo4j",
-        "password": "REDACTED_NEO4J_PASSWORD",
-        "url": "bolt://REDACTED_IP:7687",
-    },
-    "7effdf391d1301b4dff0fdd97838e307": {
-        "username": "neo4j",
-        "password": "REDACTED_NEO4J_PASSWORD",
-        "url": "bolt://REDACTED_IP:7687",
-    },
-    "69687aead0421f367f69aac6f1249cb2": {
-        "username": "neo4j",
-        "password": "REDACTED_NEO4J_PASSWORD",
-        "url": "bolt://REDACTED_IP:7687",
-    },
-    "8d02074acea413208355e0c16b66dc4e": {
-        "username": "neo4j",
-        "password": "REDACTED_NEO4J_PASSWORD",
-        "url": "bolt://REDACTED_IP:7687",
-    },
-}
+# Credentials loaded from environment variables.
+# Set NEO4J_AUTH_MAP as a JSON string, e.g.:
+# export NEO4J_AUTH_MAP='{"db_id": {"username": "neo4j", "password": "...", "url": "bolt://..."}}'
+auth_map_json = os.environ.get("NEO4J_AUTH_MAP")
+if not auth_map_json:
+    raise EnvironmentError(
+        "NEO4J_AUTH_MAP environment variable is required. "
+        "Set it as a JSON string mapping database IDs to credentials: "
+        '{"db_id": {"username": "...", "password": "...", "url": "bolt://..."}}'
+    )
+auth_map = json.loads(auth_map_json)
 
 
 for database, (creds) in auth_map.items():
 
     username, password, url = creds.values()
-    print(database, username, password, url)
+    print(database, username, url)
     storage_path = f"./storage_graph_{database}__2048"
     storage_path = f"./storage_graph_{database}_overlap_286__2048"
 
@@ -216,7 +158,6 @@ for db, exp in auth_map.items():
                 tic = time.time()
                 response = stg.query(question)
                 tac = time.time() - tic
-                # print(stg_name, response.response)
                 fact_score = evaluator.evaluate_response(response=response)
                 answer = {
                     "db": db,
@@ -229,15 +170,9 @@ for db, exp in auth_map.items():
                     "time": tac,
                 }
                 answers_map.append(answer)
-                # answers_map[db][stg_name][question] = response.response
-                # display(Markdown(f"<b>{response}</b>"))
             except Exception as e:
                 print(db, stg_name, e)
-                # continue
                 time.sleep(1)
-            # print()
-            # print()
-            # print(answers_map)
 
 print("elapsed: ", time.time() - t1)
 
