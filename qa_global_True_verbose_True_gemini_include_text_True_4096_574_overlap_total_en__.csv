@@ -1,0 +1,163 @@
+db,strategy,question,answer,answer_context,eval,eval_context,time
+7effdf391d1301b4dff0fdd97838e307,vector_based,Tell me about the relationship between Vitamind D and Covid?,"Vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19 by inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.","Vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19 by inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.",1.0,"The COVID-19 pandemic is having major economic and personal consequences for collegiate and professional sports.
+Sporting events have been canceled or postponed, and even when baseball and basketball seasons resumed in the United States recently, no fans were in attendance.
+As play resumed, several players developed COVID-19, disrupting some of the schedules.
+A hypothesis now under scientific consideration is that taking vitamin supplements to raise serum 25-hydroxyvitamin D [25OHD] concentrations could quickly reduce the risk and/or severity of COVID-19.
+Several mechanisms have been identified through which vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19: inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.
+Clinical trials have confirmed that vitamin D supplementation reduces risk of acute respiratory tract infections, and approximately 30 observational studies have shown that incidence, severity, and death from COVID-19 are inversely correlated with serum 25OHD concentrations.
+Vitamin D supplementation is already familiar to many athletes and sports teams because it improves athletic performance and increases playing longevity.
+Thus, athletes should consider vitamin D supplementation to serve as an additional means by which to reduce risk of COVID-19 and its consequences.
+The COVID-19 pandemic has had and continues to have a major impact on life and economics globally.
+Among people affected are athletes and sports teams at all levels of play.
+The Summer Olympics originally scheduled for summer 2020 in Japan are now postponed until summer 2021.
+Professional sports organizations have experienced delays, interruptions, and cancelations despite practicing significant measures designed to reduce COVID-19 risk.
+Collegiate sports seasons have been delayed, canceled, or dramatically altered by the pandemic.
+Some programs have even been eliminated in light of growing financial challenges.
+High school sports, amateur races, and recreational sports have been put on hold.
+A Google Forms survey of 692 elite and semi-elite South African athletes conducted in April found that in response to COVID-19 reductions in sports events, many of the athletes consumed excessive amounts of carbohydrates, felt depressed, and required motivation to keep active.
+Thus, additional methods to reduce risk of COVID-19 for athletes would be useful, especially if they might also improve athletic performance.
+This narrative review outlines the use of vitamin D supplementation to raise serum 25-hydroxyvitamin D [25OHD] concentrations to optimal values, which may be at least 40__ng/mL for sports ( e.g. ).
+The benefits of vitamin D for athletic performance and general well-being are similarly reviewed.
+COVID-19 is caused by the body’s dysregulated immune response to the SARS-CoV-2 virus.
+( macrophage activation, associated with the “cytokine storm”, promotes the dysregulation of innate immunity ).
+The virus enters largely through the lungs.
+The virus can enter cells by attaching to the angiotensin–converting enzyme 2 ( ACE2 ) receptor.
+SARS-CoV-2’s binding to ACE2 makes more angiotensin II available to cause damage.
+The infection also increases inflammation by ramping up production of both proinflammatory and anti-inflammatory cytokines, which can result in a cytokine storm.
+By increasing inflammation, the cytokine storm injures the epithelial layer of the lungs—which can lead to pneumonia, acute respiratory distress syndrome ( ARDS ), and sepsis —and later, other internal organs, which can lead to permanent damage.
+The following are knowledge sequence in max depth 2 in the form of directed graph like:
+`subject -[predicate]->, object, <-[predicate_next_hop]-, object_next_hop ...`
+('Covid-19 pandemic', 'Has', 'Major economic and personal consequences')",5.4213433265686035
+7effdf391d1301b4dff0fdd97838e307,vector_based,"Qual é a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar?","O texto fornecido não contém informações sobre a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar.","O texto fornecido não contém informações sobre a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar.",0.0,"The COVID-19 pandemic is having major economic and personal consequences for collegiate and professional sports.
+Sporting events have been canceled or postponed, and even when baseball and basketball seasons resumed in the United States recently, no fans were in attendance.
+As play resumed, several players developed COVID-19, disrupting some of the schedules.
+A hypothesis now under scientific consideration is that taking vitamin supplements to raise serum 25-hydroxyvitamin D [25OHD] concentrations could quickly reduce the risk and/or severity of COVID-19.
+Several mechanisms have been identified through which vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19: inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.
+Clinical trials have confirmed that vitamin D supplementation reduces risk of acute respiratory tract infections, and approximately 30 observational studies have shown that incidence, severity, and death from COVID-19 are inversely correlated with serum 25OHD concentrations.
+Vitamin D supplementation is already familiar to many athletes and sports teams because it improves athletic performance and increases playing longevity.
+Thus, athletes should consider vitamin D supplementation to serve as an additional means by which to reduce risk of COVID-19 and its consequences.
+The COVID-19 pandemic has had and continues to have a major impact on life and economics globally.
+Among people affected are athletes and sports teams at all levels of play.
+The Summer Olympics originally scheduled for summer 2020 in Japan are now postponed until summer 2021.
+Professional sports organizations have experienced delays, interruptions, and cancelations despite practicing significant measures designed to reduce COVID-19 risk.
+Collegiate sports seasons have been delayed, canceled, or dramatically altered by the pandemic.
+Some programs have even been eliminated in light of growing financial challenges.
+High school sports, amateur races, and recreational sports have been put on hold.
+A Google Forms survey of 692 elite and semi-elite South African athletes conducted in April found that in response to COVID-19 reductions in sports events, many of the athletes consumed excessive amounts of carbohydrates, felt depressed, and required motivation to keep active.
+Thus, additional methods to reduce risk of COVID-19 for athletes would be useful, especially if they might also improve athletic performance.
+This narrative review outlines the use of vitamin D supplementation to raise serum 25-hydroxyvitamin D [25OHD] concentrations to optimal values, which may be at least 40__ng/mL for sports ( e.g. ).
+The benefits of vitamin D for athletic performance and general well-being are similarly reviewed.
+COVID-19 is caused by the body’s dysregulated immune response to the SARS-CoV-2 virus.
+( macrophage activation, associated with the “cytokine storm”, promotes the dysregulation of innate immunity ).
+The virus enters largely through the lungs.
+The virus can enter cells by attaching to the angiotensin–converting enzyme 2 ( ACE2 ) receptor.
+SARS-CoV-2’s binding to ACE2 makes more angiotensin II available to cause damage.
+The infection also increases inflammation by ramping up production of both proinflammatory and anti-inflammatory cytokines, which can result in a cytokine storm.
+By increasing inflammation, the cytokine storm injures the epithelial layer of the lungs—which can lead to pneumonia, acute respiratory distress syndrome ( ARDS ), and sepsis —and later, other internal organs, which can lead to permanent damage.
+The following are knowledge sequence in max depth 2 in the form of directed graph like:
+`subject -[predicate]->, object, <-[predicate_next_hop]-, object_next_hop ...`
+('Covid-19 pandemic', 'Has', 'Major economic and personal consequences')",5.840089559555054
+7effdf391d1301b4dff0fdd97838e307,vector_based,"Descreva a relação direta ou indireta entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar trazendo referências bibliográficas conhecidas que suportem a resposta.","O texto fornecido não contém informações sobre a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar. Portanto, não posso responder à sua pergunta.","O texto fornecido não contém informações sobre a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar. Portanto, não posso responder à sua pergunta.",0.0,"The COVID-19 pandemic is having major economic and personal consequences for collegiate and professional sports.
+Sporting events have been canceled or postponed, and even when baseball and basketball seasons resumed in the United States recently, no fans were in attendance.
+As play resumed, several players developed COVID-19, disrupting some of the schedules.
+A hypothesis now under scientific consideration is that taking vitamin supplements to raise serum 25-hydroxyvitamin D [25OHD] concentrations could quickly reduce the risk and/or severity of COVID-19.
+Several mechanisms have been identified through which vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19: inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.
+Clinical trials have confirmed that vitamin D supplementation reduces risk of acute respiratory tract infections, and approximately 30 observational studies have shown that incidence, severity, and death from COVID-19 are inversely correlated with serum 25OHD concentrations.
+Vitamin D supplementation is already familiar to many athletes and sports teams because it improves athletic performance and increases playing longevity.
+Thus, athletes should consider vitamin D supplementation to serve as an additional means by which to reduce risk of COVID-19 and its consequences.
+The COVID-19 pandemic has had and continues to have a major impact on life and economics globally.
+Among people affected are athletes and sports teams at all levels of play.
+The Summer Olympics originally scheduled for summer 2020 in Japan are now postponed until summer 2021.
+Professional sports organizations have experienced delays, interruptions, and cancelations despite practicing significant measures designed to reduce COVID-19 risk.
+Collegiate sports seasons have been delayed, canceled, or dramatically altered by the pandemic.
+Some programs have even been eliminated in light of growing financial challenges.
+High school sports, amateur races, and recreational sports have been put on hold.
+A Google Forms survey of 692 elite and semi-elite South African athletes conducted in April found that in response to COVID-19 reductions in sports events, many of the athletes consumed excessive amounts of carbohydrates, felt depressed, and required motivation to keep active.
+Thus, additional methods to reduce risk of COVID-19 for athletes would be useful, especially if they might also improve athletic performance.
+This narrative review outlines the use of vitamin D supplementation to raise serum 25-hydroxyvitamin D [25OHD] concentrations to optimal values, which may be at least 40__ng/mL for sports ( e.g. ).
+The benefits of vitamin D for athletic performance and general well-being are similarly reviewed.
+COVID-19 is caused by the body’s dysregulated immune response to the SARS-CoV-2 virus.
+( macrophage activation, associated with the “cytokine storm”, promotes the dysregulation of innate immunity ).
+The virus enters largely through the lungs.
+The virus can enter cells by attaching to the angiotensin–converting enzyme 2 ( ACE2 ) receptor.
+SARS-CoV-2’s binding to ACE2 makes more angiotensin II available to cause damage.
+The infection also increases inflammation by ramping up production of both proinflammatory and anti-inflammatory cytokines, which can result in a cytokine storm.
+By increasing inflammation, the cytokine storm injures the epithelial layer of the lungs—which can lead to pneumonia, acute respiratory distress syndrome ( ARDS ), and sepsis —and later, other internal organs, which can lead to permanent damage.
+The following are knowledge sequence in max depth 2 in the form of directed graph like:
+`subject -[predicate]->, object, <-[predicate_next_hop]-, object_next_hop ...`
+('Covid-19 pandemic', 'Has', 'Major economic and personal consequences')",6.068857431411743
+7effdf391d1301b4dff0fdd97838e307,vector_based,O que é deficiência de vitamina D?,"The provided context does not mention anything about vitamin D deficiency, so I cannot answer this question from the provided context.","The provided context does not mention anything about vitamin D deficiency, so I cannot answer this question from the provided context.",0.0,"The COVID-19 pandemic is having major economic and personal consequences for collegiate and professional sports.
+Sporting events have been canceled or postponed, and even when baseball and basketball seasons resumed in the United States recently, no fans were in attendance.
+As play resumed, several players developed COVID-19, disrupting some of the schedules.
+A hypothesis now under scientific consideration is that taking vitamin supplements to raise serum 25-hydroxyvitamin D [25OHD] concentrations could quickly reduce the risk and/or severity of COVID-19.
+Several mechanisms have been identified through which vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19: inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.
+Clinical trials have confirmed that vitamin D supplementation reduces risk of acute respiratory tract infections, and approximately 30 observational studies have shown that incidence, severity, and death from COVID-19 are inversely correlated with serum 25OHD concentrations.
+Vitamin D supplementation is already familiar to many athletes and sports teams because it improves athletic performance and increases playing longevity.
+Thus, athletes should consider vitamin D supplementation to serve as an additional means by which to reduce risk of COVID-19 and its consequences.
+The COVID-19 pandemic has had and continues to have a major impact on life and economics globally.
+Among people affected are athletes and sports teams at all levels of play.
+The Summer Olympics originally scheduled for summer 2020 in Japan are now postponed until summer 2021.
+Professional sports organizations have experienced delays, interruptions, and cancelations despite practicing significant measures designed to reduce COVID-19 risk.
+Collegiate sports seasons have been delayed, canceled, or dramatically altered by the pandemic.
+Some programs have even been eliminated in light of growing financial challenges.
+High school sports, amateur races, and recreational sports have been put on hold.
+A Google Forms survey of 692 elite and semi-elite South African athletes conducted in April found that in response to COVID-19 reductions in sports events, many of the athletes consumed excessive amounts of carbohydrates, felt depressed, and required motivation to keep active.
+Thus, additional methods to reduce risk of COVID-19 for athletes would be useful, especially if they might also improve athletic performance.
+This narrative review outlines the use of vitamin D supplementation to raise serum 25-hydroxyvitamin D [25OHD] concentrations to optimal values, which may be at least 40__ng/mL for sports ( e.g. ).
+The benefits of vitamin D for athletic performance and general well-being are similarly reviewed.
+COVID-19 is caused by the body’s dysregulated immune response to the SARS-CoV-2 virus.
+( macrophage activation, associated with the “cytokine storm”, promotes the dysregulation of innate immunity ).
+The virus enters largely through the lungs.
+The virus can enter cells by attaching to the angiotensin–converting enzyme 2 ( ACE2 ) receptor.
+SARS-CoV-2’s binding to ACE2 makes more angiotensin II available to cause damage.
+The infection also increases inflammation by ramping up production of both proinflammatory and anti-inflammatory cytokines, which can result in a cytokine storm.
+By increasing inflammation, the cytokine storm injures the epithelial layer of the lungs—which can lead to pneumonia, acute respiratory distress syndrome ( ARDS ), and sepsis —and later, other internal organs, which can lead to permanent damage.
+The following are knowledge sequence in max depth 2 in the form of directed graph like:
+`subject -[predicate]->, object, <-[predicate_next_hop]-, object_next_hop ...`
+('Covid-19 pandemic', 'Has', 'Major economic and personal consequences')",3.6161370277404785
+7effdf391d1301b4dff0fdd97838e307,vector_based,O que é vitamina D e como ela pode interferir na recuperação da COVID-19?,"A vitamina D é um nutriente que pode reduzir o risco e/ou a gravidade da COVID-19. Ela pode induzir a produção de catelicidina e defensinas para reduzir a sobrevivência e replicação do vírus SARS-CoV-2, reduzir a inflamação e a produção de citocinas pró-inflamatórias e o risco da ""tempestade de citocinas"" que danifica a camada epitelial dos pulmões, coração, sistema vascular e outros órgãos, e aumentar a produção da enzima conversora de angiotensina 2, limitando assim a quantidade de angiotensina II disponível para o vírus causar danos.","A vitamina D é um nutriente que pode reduzir o risco e/ou a gravidade da COVID-19. Ela pode induzir a produção de catelicidina e defensinas para reduzir a sobrevivência e replicação do vírus SARS-CoV-2, reduzir a inflamação e a produção de citocinas pró-inflamatórias e o risco da ""tempestade de citocinas"" que danifica a camada epitelial dos pulmões, coração, sistema vascular e outros órgãos, e aumentar a produção da enzima conversora de angiotensina 2, limitando assim a quantidade de angiotensina II disponível para o vírus causar danos.",1.0,"The COVID-19 pandemic is having major economic and personal consequences for collegiate and professional sports.
+Sporting events have been canceled or postponed, and even when baseball and basketball seasons resumed in the United States recently, no fans were in attendance.
+As play resumed, several players developed COVID-19, disrupting some of the schedules.
+A hypothesis now under scientific consideration is that taking vitamin supplements to raise serum 25-hydroxyvitamin D [25OHD] concentrations could quickly reduce the risk and/or severity of COVID-19.
+Several mechanisms have been identified through which vitamin D could reduce the risks of infection and severity, death, and long-haul effects of COVID-19: inducing production of cathelicidin and defensins to reduce the survival and replication of the SARS-CoV-2 virus; reducing inflammation and the production of proinflammatory cytokines and risk of the “cytokine storm” that damages the epithelial layer of the lungs, heart, vascular system, and other organs; and increasing production of angiotensin–converting enzyme 2, thus limiting the amount of angiotensin II available to the virus to cause damage.
+Clinical trials have confirmed that vitamin D supplementation reduces risk of acute respiratory tract infections, and approximately 30 observational studies have shown that incidence, severity, and death from COVID-19 are inversely correlated with serum 25OHD concentrations.
+Vitamin D supplementation is already familiar to many athletes and sports teams because it improves athletic performance and increases playing longevity.
+Thus, athletes should consider vitamin D supplementation to serve as an additional means by which to reduce risk of COVID-19 and its consequences.
+The COVID-19 pandemic has had and continues to have a major impact on life and economics globally.
+Among people affected are athletes and sports teams at all levels of play.
+The Summer Olympics originally scheduled for summer 2020 in Japan are now postponed until summer 2021.
+Professional sports organizations have experienced delays, interruptions, and cancelations despite practicing significant measures designed to reduce COVID-19 risk.
+Collegiate sports seasons have been delayed, canceled, or dramatically altered by the pandemic.
+Some programs have even been eliminated in light of growing financial challenges.
+High school sports, amateur races, and recreational sports have been put on hold.
+A Google Forms survey of 692 elite and semi-elite South African athletes conducted in April found that in response to COVID-19 reductions in sports events, many of the athletes consumed excessive amounts of carbohydrates, felt depressed, and required motivation to keep active.
+Thus, additional methods to reduce risk of COVID-19 for athletes would be useful, especially if they might also improve athletic performance.
+This narrative review outlines the use of vitamin D supplementation to raise serum 25-hydroxyvitamin D [25OHD] concentrations to optimal values, which may be at least 40__ng/mL for sports ( e.g. ).
+The benefits of vitamin D for athletic performance and general well-being are similarly reviewed.
+COVID-19 is caused by the body’s dysregulated immune response to the SARS-CoV-2 virus.
+( macrophage activation, associated with the “cytokine storm”, promotes the dysregulation of innate immunity ).
+The virus enters largely through the lungs.
+The virus can enter cells by attaching to the angiotensin–converting enzyme 2 ( ACE2 ) receptor.
+SARS-CoV-2’s binding to ACE2 makes more angiotensin II available to cause damage.
+The infection also increases inflammation by ramping up production of both proinflammatory and anti-inflammatory cytokines, which can result in a cytokine storm.
+By increasing inflammation, the cytokine storm injures the epithelial layer of the lungs—which can lead to pneumonia, acute respiratory distress syndrome ( ARDS ), and sepsis —and later, other internal organs, which can lead to permanent damage.
+The following are knowledge sequence in max depth 2 in the form of directed graph like:
+`subject -[predicate]->, object, <-[predicate_next_hop]-, object_next_hop ...`
+('Covid-19 pandemic', 'Has', 'Major economic and personal consequences')",6.009646654129028
+7effdf391d1301b4dff0fdd97838e307,rag,Tell me about the relationship between Vitamind D and Covid?,Empty Response,Empty Response,0.0,,0.0011074542999267578
+7effdf391d1301b4dff0fdd97838e307,rag,"Qual é a relação entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar?",Empty Response,Empty Response,0.0,,0.0002665519714355469
+7effdf391d1301b4dff0fdd97838e307,rag,"Descreva a relação direta ou indireta entre a severidade, recuperação e infecção à COVID 19, insuficiência e deficiência de Vitamina D e o uso de protetor solar trazendo referências bibliográficas conhecidas que suportem a resposta.",Empty Response,Empty Response,0.0,,0.00023674964904785156
+7effdf391d1301b4dff0fdd97838e307,rag,O que é deficiência de vitamina D?,Empty Response,Empty Response,0.0,,0.0003600120544433594
+7effdf391d1301b4dff0fdd97838e307,rag,O que é vitamina D e como ela pode interferir na recuperação da COVID-19?,Empty Response,Empty Response,0.0,,0.0002295970916748047
+7effdf391d1301b4dff0fdd97838e307,rag,Quem é Silvio Santos?,Empty Response,Empty Response,0.0,,0.0003676414489746094
+7effdf391d1301b4dff0fdd97838e307,rag,what is vitamin d insufficiency?,Empty Response,Empty Response,0.0,,0.00022673606872558594
+7effdf391d1301b4dff0fdd97838e307,rag,what is the ideal vitami D serum concentration for a human being?,Empty Response,Empty Response,0.0,,0.0003528594970703125
+7effdf391d1301b4dff0fdd97838e307,rag,what is vitamin d deficiency?,Empty Response,Empty Response,0.0,,0.000232696533203125
+7effdf391d1301b4dff0fdd97838e307,rag,"What is the relationship between the COVID-19 infection, Vitamin D insufficiency and deficiency?",Empty Response,Empty Response,0.0,,0.00023627281188964844
+7effdf391d1301b4dff0fdd97838e307,rag,"What is the relationship between the severity, recovery, and COVID-19 infection, Vitamin D insufficiency and deficiency, and the use of sunscreen?",Empty Response,Empty Response,0.0,,0.0002319812774658203
+7effdf391d1301b4dff0fdd97838e307,rag,"Trace the direct or indirect relationship between the severity, recovery, and COVID-19 infection, Vitamin D insufficiency and deficiency, and the use of sunscreen, bringing known bibliographic references that support the answer.",Empty Response,Empty Response,0.0,,0.0002455711364746094
+7effdf391d1301b4dff0fdd97838e307,rag,Who is Silvio Santos?,Empty Response,Empty Response,0.0,,0.00022292137145996094
+7effdf391d1301b4dff0fdd97838e307,rag,¿Qué es la insuficiencia de vitamina D?,Empty Response,Empty Response,0.0,,0.00022220611572265625
+7effdf391d1301b4dff0fdd97838e307,rag,¿Cuál es la concentración ideal de vitamina D en suero para un ser humano?,Empty Response,Empty Response,0.0,,0.00023746490478515625
+7effdf391d1301b4dff0fdd97838e307,rag,¿Qué es la deficiencia de vitamina D?,Empty Response,Empty Response,0.0,,0.00024437904357910156
+7effdf391d1301b4dff0fdd97838e307,rag,"¿Cuál es la relación entre la infección por COVID-19, la insuficiencia y la deficiencia de vitamina D?",Empty Response,Empty Response,0.0,,0.0002510547637939453
