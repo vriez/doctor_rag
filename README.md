@@ -2,7 +2,7 @@
 
 # Doctor RAG
 
-Knowledge Graph-based Retrieval-Augmented Generation (RAG) system for medical literature analysis. Built as part of the master's thesis: **"Uso da Inteligencia Artificial na Procura de Relacoes entre COVID-19 e Vitamina D"**.
+Knowledge Graph-based Retrieval-Augmented Generation (RAG) system for medical literature analysis. Built as part of the master's thesis: **"Mineração de Texto, Inteligência Artificial e Aplicações em Biotecnologia"**.
 
 The system extracts structured knowledge (entity-relationship triplets) from a medical corpus about **Vitamin D and COVID-19**, stores it in a Neo4j graph database, and provides multiple query strategies to answer medical questions with faithfulness evaluation.
 
@@ -43,6 +43,8 @@ doctor_rag/
 ├── requirements.txt       # Python dependencies
 ├── environment.yml        # Conda environment
 ├── .env.example           # Required environment variables
+├── biblio.bib             # BibTeX bibliography
+├── er_diagram.png         # Entity-relationship diagram
 ├── 10.2.Clinical_RE_Knowledge_Graph_with_Neo4j.ipynb  # Spark NLP clinical RE notebook
 ├── server/
 │   ├── app.py             # Streamlit chat interface
@@ -151,6 +153,9 @@ python qa_index_chain.py    # Multi-strategy evaluation with Gemini
 | Embeddings | Gemini Embedding-001 | Google |
 | Cypher generation | gpt-3.5-turbo / gpt-4 | OpenAI |
 | Local LLM & embeddings | Mistral | Ollama |
+| Clinical NER/RE pipelines | Spark NLP Healthcare | John Snow Labs |
+
+> **Note:** The thesis originally used Mistral (local, via Ollama) as the primary LLM for triplet extraction, chosen over gpt-3.5-turbo due to cost constraints. The codebase later evolved to use Google Gemini for this role in `RAGout.py`, while Mistral remains in the server component (`server/rag.py`).
 
 ## Query Strategies
 
@@ -269,7 +274,7 @@ If you use this work in your research, please cite:
 
 ```bibtex
 @mastersthesis{reis2024doctorrag,
-  title     = {Uso da Intelig\^encia Artificial na Procura de Rela\c{c}\~oes entre COVID-19 e Vitamina D},
+  title     = {Minera\c{c}\~ao de Texto, Intelig\^encia Artificial e Aplica\c{c}\~oes em Biotecnologia},
   author    = {Reis, Vitor Eul\'alio},
   year      = {2024},
   school    = {Universidade Federal de S\~ao Carlos (UFSCar)},
@@ -279,9 +284,9 @@ If you use this work in your research, please cite:
 
 ## Acknowledgments
 
-- **Advisor:** Prof. Dr. Ignez Caracelli
-- **Institution:** Universidade Federal de Sao Carlos (UFSCar) — Programa de Pos-Graduacao em Biotecnologia
-- **Funding:** CAPES (Coordenacao de Aperfeicoamento de Pessoal de Nivel Superior)
+- **Advisor:** Prof.ª Dr.ª Ignez Caracelli
+- **Institution:** Universidade Federal de São Carlos (UFSCar) — Programa de Pós-Graduação em Biotecnologia
+- **Funding:** CAPES (Coordenação de Aperfeiçoamento de Pessoal de Nível Superior)
 
 ## License
 

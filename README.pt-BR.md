@@ -2,7 +2,7 @@
 
 # Doctor RAG
 
-Sistema de Geração Aumentada por Recuperação (RAG) baseado em Grafo de Conhecimento para análise de literatura médica. Desenvolvido como parte da dissertação de mestrado: **"Uso da Inteligência Artificial na Procura de Relações entre COVID-19 e Vitamina D"**.
+Sistema de Geração Aumentada por Recuperação (RAG) baseado em Grafo de Conhecimento para análise de literatura médica. Desenvolvido como parte da dissertação de mestrado: **"Mineração de Texto, Inteligência Artificial e Aplicações em Biotecnologia"**.
 
 O sistema extrai conhecimento estruturado (triplas entidade-relacionamento) de um corpus médico sobre **Vitamina D e COVID-19**, armazena em um banco de dados de grafos Neo4j e oferece múltiplas estratégias de consulta para responder perguntas médicas com avaliação de fidelidade.
 
@@ -43,6 +43,8 @@ doctor_rag/
 ├── requirements.txt       # Dependências Python
 ├── environment.yml        # Ambiente Conda
 ├── .env.example           # Variáveis de ambiente necessárias
+├── biblio.bib             # Bibliografia em BibTeX
+├── er_diagram.png         # Diagrama entidade-relacionamento
 ├── 10.2.Clinical_RE_Knowledge_Graph_with_Neo4j.ipynb  # Notebook Spark NLP de RE clínica
 ├── server/
 │   ├── app.py             # Interface chat Streamlit
@@ -151,6 +153,9 @@ python qa_index_chain.py    # Avaliação multi-estratégia com Gemini
 | Embeddings | Gemini Embedding-001 | Google |
 | Geração de Cypher | gpt-3.5-turbo / gpt-4 | OpenAI |
 | LLM e embeddings locais | Mistral | Ollama |
+| Pipelines clínicos de NER/RE | Spark NLP Healthcare | John Snow Labs |
+
+> **Nota:** A dissertação utilizou originalmente o Mistral (local, via Ollama) como LLM principal para extração de triplas, escolhido em vez do gpt-3.5-turbo por restrições de custo. O código evoluiu posteriormente para usar o Google Gemini nessa função no `RAGout.py`, enquanto o Mistral permanece no componente server (`server/rag.py`).
 
 ## Estratégias de Consulta
 
@@ -269,7 +274,7 @@ Se utilizar este trabalho em sua pesquisa, por favor cite:
 
 ```bibtex
 @mastersthesis{reis2024doctorrag,
-  title     = {Uso da Intelig\^encia Artificial na Procura de Rela\c{c}\~oes entre COVID-19 e Vitamina D},
+  title     = {Minera\c{c}\~ao de Texto, Intelig\^encia Artificial e Aplica\c{c}\~oes em Biotecnologia},
   author    = {Reis, Vitor Eul\'alio},
   year      = {2024},
   school    = {Universidade Federal de S\~ao Carlos (UFSCar)},
